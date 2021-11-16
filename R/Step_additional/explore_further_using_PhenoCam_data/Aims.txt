@@ -1,0 +1,9 @@
+Aims: in this experiment, I am trying to explore the vegetation indexes ranges from some gradient(temperature or latitude gradient)
+from PhenoCam (mainly for the sites from the North America)-->mainly focused on the evergreen needle forest:
+1)Temperature gradient-->based on the SPRUCE experiment(https://mnspruce.ornl.gov/, which is an warming experient spanning from 0-9 degree warming)
+--> to investigate the GCC/RCC/GRVI changes during the temperature gradient.
+2)Latitude gradient-->slecting the PhenoCam sites with ENF species that located in the Northern America-->to check what's the changes for the VIs from
+PhenoCam
+
+
+ 

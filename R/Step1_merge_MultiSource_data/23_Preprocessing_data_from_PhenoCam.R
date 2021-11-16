@@ -7,7 +7,7 @@
 #---------------
 #load the data from the PhenoCam-USA
 #---------------
-phenocam.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/PhenoCam_Data/Through_PhenoCam_USA/VIs/"
+phenocam.path<-"D:/CES/Data_for_use/PhenoCam_Data/Through_PhenoCam_USA/VIs/"
 setwd(phenocam.path)
 site.files<-list.files()
 #
@@ -22,7 +22,7 @@ for(i in 1:length(site.files)){
 #---------------
 #load the data from the EuroPheno 
 #---------------
-phenocam.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/PhenoCam_Data/Through_EuroPheno/VIs/"
+phenocam.path<-"D:/CES/Data_for_use/PhenoCam_Data/Through_EuroPheno/VIs/"
 setwd(phenocam.path)
 site.files<-list.files()
 df.Phenocam_EU<-c()
@@ -51,14 +51,16 @@ pos_1<-match(co_vars,names(df.Phenocam))
 pos_2<-match(co_vars,names(df.Phenocam_EU))
 df.Phenocam_new<-rbind(df.Phenocam[,pos_1],df.Phenocam_EU[,pos_2])
 #----------------------------------------------------
-#2. select the variables we are interested in
+#2. select the variables we are interested in and calculated the new PhenoCam VIs
 #----------------------------------------------------
-sel_variables<-c("sitename","date","year","doy","gcc_90","rcc_90","max_solar_elev","snow_flag","PFT","RoiID")
-df.Phenocam_daily<-df.Phenocam_new[,sel_variables]
-
+sel_variables<-c("sitename","date","year","doy","midday_r","midday_g","midday_b","gcc_90","rcc_90","max_solar_elev","snow_flag","PFT","RoiID")
+df.Phenocam_daily<-df.Phenocam_new[,sel_variables]  #23 sites
+names(df.Phenocam_daily)<-c("sitename","date","year","doy","midday_r","midday_g","midday_b","gcc_90","rcc_90","max_solar_elev","snow_flag","PhenoCam_PFT","RoiID")
+#calculating GRVI:(DNgreen-DNred)/(DNgreen+DNred)-->here using (gcc-rcc)/(gcc+rcc)
+df.Phenocam_daily$GRVI<-c(df.Phenocam_daily$gcc_90 - df.Phenocam_daily$rcc_90)/c(df.Phenocam_daily$gcc_90 + df.Phenocam_daily$rcc_90)
 #----------------
 #3.save the preprocessed daily data
 #----------------
-save.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/PhenoCam_Data/Preprocessed_data/"
+save.path<-"D:/CES/Data_for_use/PhenoCam_Data/Preprocessed_data/"
 save(df.Phenocam_daily,file=paste0(save.path,"Daily_data.RDA"))
 

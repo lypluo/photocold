@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------
 #(1)load the data after aligning
 #-------------------------------------------------------------------------
-load.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Merge_Data/sep_event_data/"
+load.path<-"D:/CES/Data_for_use/Merge_Data/sep_event_data/"
 load(paste0(load.path,"df_len5_nonnorm.RDA"))
 
 #-------------------------------------------------------------------------
@@ -132,7 +132,7 @@ plot_2groups<-function(df,comp_var,var_unit,do_norm){
   #gpp_obs,gpp_mod_full,gpp_obs_norm,gpp_mod_norm,gpp_res
 
 #save the plot
-save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_vars/based_Beni/update_results/box_plot/"
+save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_vars/based_Beni/update_results/box_plot/All_sites/"
 #a1.check for the gpp_obs
 #b_30 stands for 30 days before event
 #gpp_obs_len5

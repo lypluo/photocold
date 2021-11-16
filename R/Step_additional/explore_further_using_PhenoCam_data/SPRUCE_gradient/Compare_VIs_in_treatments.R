@@ -1,0 +1,218 @@
+##########################################
+#compare the VIs from PhenoCam between different treatments
+##########################################
+#------------------------------------
+#(1).load the download daily data
+#------------------------------------
+load.path<-"D:/CES/Data_for_use/PhenoCam_Data/Through_PhenoCam_USA/VIs/SPRUCE/"
+#For EN
+load(paste0(load.path,"Cam_VIs_EN",".RDA"))
+#For SH
+load(paste0(load.path,"Cam_VIs_SH",".RDA"))
+
+#------------------------------------
+#(2).select the core variables calculate the GRVI index
+#------------------------------------
+sel_cal_VIs<-function(df){
+  # df<-SPRUCE_VIs_EN
+  df<-as.data.frame(df)
+  sel_variables<-c("treatment","date","year","doy","midday_r","midday_g","midday_b","gcc_90","rcc_90","max_solar_elev","snow_flag","outlierflag_gcc_90","PFT","RoiID")
+  df.Phenocam_daily<-df[,sel_variables]  
+  names(df.Phenocam_daily)<-c("treatment","date","year","doy","midday_r","midday_g","midday_b","gcc_90","rcc_90","max_solar_elev","snow_flag","outlierflag_gcc_90","PhenoCam_PFT","RoiID")
+  #calculating GRVI:(DNgreen-DNred)/(DNgreen+DNred)-->here using (gcc-rcc)/(gcc+rcc)
+  df.Phenocam_daily$GRVI<-c(df.Phenocam_daily$gcc_90 - df.Phenocam_daily$rcc_90)/c(df.Phenocam_daily$gcc_90 + df.Phenocam_daily$rcc_90)
+  #calculate the relative indexes
+  df.Phenocam_daily$RVI<-df.Phenocam_daily$rcc_90/df.Phenocam_daily$gcc_90
+  #convert the format of Date
+  df.Phenocam_daily$date<-as.Date(df.Phenocam_daily$date)
+  #
+  return(df.Phenocam_daily)
+}
+#
+VIs_EN<-sel_cal_VIs(SPRUCE_VIs_EN)
+VIs_SH<-sel_cal_VIs(SPRUCE_VIs_SH)
+
+#---------------------------------------------
+#(3).compare the VIs among different treatments
+#----------------------------------------------
+#comparing the original VIs
+library(ggplot2)
+library(zoo)
+library(data.table)  #frollmean
+library(plyr)
+library(tidyverse)
+#using original data and normalized data
+#using the quantile 5% an quantile 95% to normalize the data
+norm_fun<-function(x){
+  mn<-quantile(x,0.05,na.rm = T)
+  mm<-quantile(x,0.95,na.rm = T)
+  x_norm<-c(x-mn)/c(mm-mn)
+  # x_norm<-x/mn
+  return(x_norm)
+}
+
+#function to compare different VIs
+compare_VIs<-function(df,y_range,do_norm){
+  # df<-VIs_EN
+  # y_range<-data.frame(gcc_range=c(0.315,0.425),rcc_range=c(0.325,0.525),
+  #                     GRVI_range=c(-0.2,0.1),RVI_range=c(-0.2,0.1))
+  # do_norm<-TRUE
+  
+  #select the variables
+  df_sel<-df[,c("treatment","date","year","doy","gcc_90","rcc_90","GRVI","RVI")]
+  treatments<-unique(df_sel$treatment)
+  #need to normalize for each treatment
+  if(do_norm==TRUE){
+    temp_norm<-c()
+    for(i in 1:length(treatments)){
+      tt<-df_sel[df_sel$treatment==treatments[i],]
+      tt_norm<-apply(tt[,c(5:ncol(df_sel))],2,norm_fun)
+      tt_final<-cbind(tt[,c(1:4)],tt_norm)
+      temp_norm<-rbind(temp_norm,tt_final)
+    }
+  #
+   df_sel<-temp_norm
+  }
+  #moving window,window=10-->for different treatments-->smoothed the data
+  df_sel_new<-c()
+  for( i in 1:length(treatments)){
+    tt<-df_sel[df_sel$treatment==treatments[i],]
+    temp_sm<-frollmean(tt[,c("gcc_90","rcc_90","GRVI","RVI"),],10,na.rm = T)
+    tt_new<-cbind(tt,temp_sm[[1]],temp_sm[[2]],temp_sm[[3]],temp_sm[[4]])
+    names(tt_new)<-c("treatment","date","year","doy","gcc_90","rcc_90","GRVI","RVI",
+                         "gcc_90_sm","rcc_90_sm","GRVI_sm","RVI_sm")
+    df_sel_new<-rbind(df_sel_new,tt_new)
+  }
+
+  #further classify:
+  df_sel_new$CO2_flag<-rep(NA,nrow(df_sel_new))
+  for(i in 1:nrow(df_sel_new)){
+    #grepl-->if find the string return TRUE
+    ifelse(grepl("ACO2",df_sel_new$treatment[i]),df_sel_new$CO2_flag[i]<-"Ambient",df_sel_new$CO2_flag[i]<-"Elevated")
+  }
+  #GCC
+  p_gcc_ACO2<-ggplot(df_sel_new[df_sel_new$CO2_flag=="Ambient",],aes(x=date,y=gcc_90,col=treatment))+
+    geom_point(size=0.6)+
+    geom_line(aes(x=date,y=gcc_90_sm,col=treatment),size=1.2)+
+    scale_color_manual("",values = c("T0ACO2"="orchid",
+    "T2ACO2"=adjustcolor("orangered",1),
+    "T4ACO2"=adjustcolor("steelblue2",1),
+    "T6ACO2"=adjustcolor("olivedrab",1),
+    "T9ACO2"=adjustcolor("forestgreen",1)))+
+    annotate(geom = "text",x=as.Date("2016-01-01"),y=y_range[2,1],label="Ambient")+
+    ylim(y_range[1,1],y_range[2,1])+
+    theme_light()
+  p_gcc_ECO2<-ggplot(df_sel_new[df_sel_new$CO2_flag=="Elevated",],aes(x=date,y=gcc_90,col=treatment))+
+    geom_point(size=0.6)+
+    geom_line(aes(x=date,y=gcc_90_sm,col=treatment),size=1.2)+
+    scale_color_manual("",values = c("T0ECO2"=adjustcolor("orchid",1),
+    "T2ECO2"=adjustcolor("orangered",1),
+    "T4ECO2"=adjustcolor("steelblue2",1),
+    "T6ECO2"=adjustcolor("olivedrab",1),
+    "T9ECO2"=adjustcolor("forestgreen",1)))+
+    annotate(geom = "text",x=as.Date("2016-01-01"),y=y_range[2,1],label="Elevated")+
+    ylim(y_range[1,1],y_range[2,1])+
+    theme_light()
+  
+  #RCC
+  p_rcc_ACO2<-ggplot(df_sel_new[df_sel_new$CO2_flag=="Ambient",],aes(x=date,y=rcc_90,col=treatment))+
+    geom_point(size=0.6)+
+    geom_line(aes(x=date,y=rcc_90_sm,col=treatment),size=1.2)+
+    scale_color_manual("",values = c("T0ACO2"="orchid",
+                                     "T2ACO2"=adjustcolor("orangered",1),
+                                     "T4ACO2"=adjustcolor("steelblue2",1),
+                                     "T6ACO2"=adjustcolor("olivedrab",1),
+                                     "T9ACO2"=adjustcolor("forestgreen",1)))+
+    annotate(geom = "text",x=as.Date("2016-01-01"),y=y_range[2,2],label="Ambient")+
+    ylim(y_range[1,2],y_range[2,2])+
+    theme_light()
+  p_rcc_ECO2<-ggplot(df_sel_new[df_sel_new$CO2_flag=="Elevated",],aes(x=date,y=rcc_90,col=treatment))+
+    geom_point(size=0.6)+
+    geom_line(aes(x=date,y=rcc_90_sm,col=treatment),size=1.2)+
+    scale_color_manual("",values = c("T0ECO2"="orchid",
+                                     "T2ECO2"=adjustcolor("orangered",1),
+                                     "T4ECO2"=adjustcolor("steelblue2",1),
+                                     "T6ECO2"=adjustcolor("olivedrab",1),
+                                     "T9ECO2"=adjustcolor("forestgreen",1)))+
+    annotate(geom = "text",x=as.Date("2016-01-01"),y=y_range[2,2],label="Elevated")+
+    ylim(y_range[1,2],y_range[2,2])+
+    theme_light()
+ #GRVI:
+  p_GRVI_ACO2<-ggplot(df_sel_new[df_sel_new$CO2_flag=="Ambient",],aes(x=date,y=GRVI,col=treatment))+
+    geom_point(size=0.6)+
+    geom_line(aes(x=date,y=GRVI_sm,col=treatment),size=1.2)+
+    scale_color_manual("",values = c("T0ACO2"="orchid",
+                                     "T2ACO2"=adjustcolor("orangered",1),
+                                     "T4ACO2"=adjustcolor("steelblue2",1),
+                                     "T6ACO2"=adjustcolor("olivedrab",1),
+                                     "T9ACO2"=adjustcolor("forestgreen",1)))+
+    annotate(geom = "text",x=as.Date("2016-01-01"),y=y_range[2,3],label="Ambient")+
+    ylim(y_range[1,3],y_range[2,3])+
+    theme_light()
+  p_GRVI_ECO2<-ggplot(df_sel_new[df_sel_new$CO2_flag=="Elevated",],aes(x=date,y=GRVI,col=treatment))+
+    geom_point(size=0.6)+
+    geom_line(aes(x=date,y=GRVI_sm,col=treatment),size=1.2)+
+    scale_color_manual("",values = c("T0ECO2"="orchid",
+                                     "T2ECO2"=adjustcolor("orangered",1),
+                                     "T4ECO2"=adjustcolor("steelblue2",1),
+                                     "T6ECO2"=adjustcolor("olivedrab",1),
+                                     "T9ECO2"=adjustcolor("forestgreen",1)))+
+    annotate(geom = "text",x=as.Date("2016-01-01"),y=y_range[2,3],label="Elevated")+
+    ylim(y_range[1,3],y_range[2,3])+
+    theme_light()
+  #RVI:
+  p_RVI_ACO2<-ggplot(df_sel_new[df_sel_new$CO2_flag=="Ambient",],aes(x=date,y=RVI,col=treatment))+
+    geom_point(size=0.6)+
+    geom_line(aes(x=date,y=RVI_sm,col=treatment),size=1.2)+
+    scale_color_manual("",values = c("T0ACO2"="orchid",
+                                     "T2ACO2"=adjustcolor("orangered",1),
+                                     "T4ACO2"=adjustcolor("steelblue2",1),
+                                     "T6ACO2"=adjustcolor("olivedrab",1),
+                                     "T9ACO2"=adjustcolor("forestgreen",1)))+
+    annotate(geom = "text",x=as.Date("2016-01-01"),y=y_range[2,4],label="Ambient")+
+    ylim(y_range[1,4],y_range[2,4])+
+    theme_light()
+  p_RVI_ECO2<-ggplot(df_sel_new[df_sel_new$CO2_flag=="Elevated",],aes(x=date,y=RVI,col=treatment))+
+    geom_point(size=0.6)+
+    geom_line(aes(x=date,y=RVI_sm,col=treatment),size=1.2)+
+    scale_color_manual("",values = c("T0ECO2"="orchid",
+                                     "T2ECO2"=adjustcolor("orangered",1),
+                                     "T4ECO2"=adjustcolor("steelblue2",1),
+                                     "T6ECO2"=adjustcolor("olivedrab",1),
+                                     "T9ECO2"=adjustcolor("forestgreen",1)))+
+    annotate(geom = "text",x=as.Date("2016-01-01"),y=y_range[2,4],label="Elevated")+
+    ylim(y_range[1,4],y_range[2,4])+
+    theme_light()
+##merge the plot:
+  library(cowplot)
+  library(grid)
+  gg_gcc90<-plot_grid(p_gcc_ACO2,p_gcc_ECO2,
+                     labels = "auto",nrow =2,label_size = 12,align = "hv")
+  gg_rcc90<-plot_grid(p_rcc_ACO2,p_rcc_ECO2,
+                      labels = "auto",nrow =2,label_size = 12,align = "hv")
+  gg_GRVI<-plot_grid(p_GRVI_ACO2,p_GRVI_ECO2,
+            labels = "auto",nrow =2,label_size = 12,align = "hv")
+  gg_RVI<-plot_grid(p_RVI_ACO2,p_RVI_ECO2,
+                     labels = "auto",nrow =2,label_size = 12,align = "hv")
+  #plot list
+  gg_plot<-list(gg_gcc90,gg_rcc90,gg_GRVI,gg_RVI)
+  names(gg_plot)<-c("gcc90","rcc90","GRVI","RVI")
+  return(gg_plot)
+}
+
+#For original data
+y_range_EN<-data.frame(gcc_range=c(0.315,0.425),rcc_range=c(0.325,0.525),
+                    GRVI_range=c(-0.2,0.1),RVI_range=c(0.8,2.2))
+plot_VIs_EN<-compare_VIs(VIs_EN,y_range_EN,do_norm = FALSE)
+y_range_SH<-data.frame(gcc_range=c(0.295,0.45),rcc_range=c(0.325,0.65),
+                       GRVI_range=c(-0.35,0.05),RVI_range=c(0.8,2.2))
+plot_VIs_SH<-compare_VIs(VIs_SH,y_range_SH,do_norm = FALSE)
+
+
+#For normalized data
+y_range_EN<-data.frame(gcc_range=c(-0.1,1.1),rcc_range=c(-0.1,1.1),
+                       GRVI_range=c(-0.1,1.1),RVI_range=c(-0.1,1.1))
+plot_VIs_EN<-compare_VIs(VIs_EN,y_range_EN,do_norm = TRUE)
+y_range_SH<-data.frame(gcc_range=c(-0.1,1.1),rcc_range=c(-0.1,1.1),
+                       GRVI_range=c(-0.1,1.1),RVI_range=c(-0.1,1.1))
+plot_VIs_SH<-compare_VIs(VIs_SH,y_range_SH,do_norm = TRUE)

@@ -6,7 +6,7 @@
 #---------------------
 #A.load the event_length data
 #---------------------
-load.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/event_length/"
+load.path<-"D:/CES/Data_for_use/event_length/"
 load(paste0(load.path,"df_events_length.RDA"))
 # a function to separate out the site-year that event_length higher than some thresholds(e.g. 30 days)
 sep_siteyears<-function(df,sep_var,sep_thrs){
@@ -23,7 +23,7 @@ sep_siteyears<-function(df,sep_var,sep_thrs){
   names(df_new)<-c("event_siteyears","noevent_siteyears")
   return(df_new)
 }
-##separate the site-year when the over_days_length > 30 days
+##separate the site-year when the over_days_length > 20 days
 df.sep20<-sep_siteyears(df_events_all,"Over_days_length",20)
 # df.sep30<-sep_siteyears(df_events_all,"Over_days_length",30)
 # df.sep45<-sep_siteyears(df_events_all,"Over_days_length",45)
@@ -31,14 +31,16 @@ df.sep20<-sep_siteyears(df_events_all,"Over_days_length",20)
 #---------------------
 #B.load the data 
 #---------------------
-load.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Data_sent_by_Beni/"
+load.path<-"D:/CES/Data_for_use/Data_sent_by_Beni/"
 #from new method:
 load(paste0(load.path,"ddf_labeled_norm_trs_newmethod_all_overestimation.RDA"))
 df_norm_trs_newM_oversites<-ddf_labeled;rm(ddf_labeled)  #sites flagged as Beni that have the gpp overestimation in the spring 
 load(paste0(load.path,"ddf_labeled_norm_trs_newmethod_sites_flag_without_overestimation.RDA"))
 df_norm_trs_newM_no_oversites<-ddf_labeled;rm(ddf_labeled)  #sites flagged as Beni that do not have the gpp overestimation in the spring
-#merge two datasets
-df_norm_all<-rbind(df_norm_trs_newM_no_oversites,df_norm_trs_newM_oversites)
+load(paste0(load.path,"ddf_labeled_norm_trs_newmethod_all_overestimation_beyondsites.RDA"))
+df_norm_trs_newM_beyond_sites<-ddf_labeled;rm(ddf_labeled)  #sites beyond Beni's datasets
+#merge the datasets
+df_norm_all<-rbind(rbind(df_norm_trs_newM_no_oversites,df_norm_trs_newM_oversites),df_norm_trs_newM_beyond_sites)
 
 #-------------------------------------------------------------------------
 #(2)start to align the data according to Beni's functions of "align_events" and "get_consecutive"
@@ -46,7 +48,7 @@ df_norm_all<-rbind(df_norm_trs_newM_no_oversites,df_norm_trs_newM_oversites)
 #---------------------------------
 #source the functions to detect the consecutive events
 #---------------------------------
-fun.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/R/Step2_identify_events/Functions/functions_from_beni/"
+fun.path<-"D:/CES/R_testcode/PhotoCold/Second_round_of_code/R/Step2_identify_events/Functions/functions_from_beni/"
 #source get_consecutive.R
 source(paste0(fun.path,"get_consecutive.R"))
 #source get_consecutive_greenup.R
@@ -443,7 +445,7 @@ plot_2groups<-function(df,comp_var,var_unit,do_norm){
     return(p_merge)
   }
 #save the plot
-save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_vars/based_Beni/lines_plot/"
+save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_vars/based_Beni/update_results/"
 #------------------------------
 #(A)first using df_len20-->using event date from [-30,end of event]
 #------------------------------ 
@@ -463,7 +465,7 @@ df_len5_norm<-sep_siteyears_data(df_norm_all,do_vars,df.sep20,5,30,0,10,TRUE)
 #-------------
 #save the data
 #-------------
-data.save.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Merge_Data/sep_event_data/"
+data.save.path<-"D:/CES/Data_for_use/Merge_Data/sep_event_data/"
 save(df_len5_nonnorm,file=paste0(data.save.path,"df_len5_nonnorm.RDA"))
 
 #test with "temp_day_fluxnet2015" and "temp_min_fluxnet2015"
@@ -478,10 +480,10 @@ ggsave(paste0(save.path,"temp_min_len5_b30_nonnorm.png"),p_temp_min_len5_b30_non
 p_temp_min_len5_b30_norm<-plot_2groups(df_len5_norm,"temp_min_fluxnet2015","(degreeC)",TRUE)
 ggsave(paste0(save.path,"temp_min_len5_b30_merge_norm.png"),p_temp_min_len5_b30_norm,width = 15,height = 12)
 #-------------------------
-#After the test, it seems use the original data (not normalized data will be more intutive)
-#Hence,update the results with no-normlization
+#After the test, it seems use the original data (not normalized data will be more intutive for the more varied variables such as GPP, Ta)
+#Hence,update the results with no-normlization for following variables:gpp,temp
 #-------------------------
-save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_vars/based_Beni/update_results/"
+save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_vars/based_Beni/update_results/lines_plot/"
 #a1.check for the gpp_obs
 #b_30 stands for 30 days before event
 #gpp_obs_len5
@@ -528,7 +530,7 @@ ggsave(paste0(save.path,"fapar_itpl_len5_b30.png"),p_fapar_itpl_len5_b30,width =
 # #
 # p_fapar_spl_len30_b30<-plot_2groups(df_len30,"fapar_spl","")
 # ggsave(paste0(save.path,"fapar_spl_len30_b30.png"),p_fapar_spl_len30_b30,width = 15,height = 12)
-# #
+# # 
 # p_fapar_spl_len40_b30<-plot_2groups(df_len40,"fapar_spl","")
 # ggsave(paste0(save.path,"fapar_spl_len40_b30.png"),p_fapar_spl_len40_b30,width = 15,height = 12)
 
@@ -545,16 +547,28 @@ ggsave(paste0(save.path,"prec_len5_b30.png"),p_prec_len5_b30,width = 15,height =
 p_ppfd_len5_b30<-plot_2groups(df_len5_nonnorm,"ppfd_fluxnet2015","(u mol m-2 s-1)",do_norm = FALSE)
 ggsave(paste0(save.path,"ppfd_len5_b30.png"),p_ppfd_len5_b30,width = 15,height = 12)
 
-#additional: add more variables to compare-->July-5
+#additional: add more variables to compare
 #temp_min
 p_temp_min_len5_b30<-plot_2groups(df_len5_nonnorm,"temp_min_fluxnet2015","(degreeC)",do_norm = FALSE)
 ggsave(paste0(save.path,"temp_min_len5_b30.png"),p_temp_min_len5_b30,width = 15,height = 12)
 #temp_max
 p_temp_max_len5_b30<-plot_2groups(df_len5_nonnorm,"temp_max_fluxnet2015","(degreeC)",do_norm = FALSE)
 ggsave(paste0(save.path,"temp_max_len5_b30.png"),p_temp_max_len5_b30,width = 15,height = 12)
+
+###for gcc and rcc-->both using nonnorm and norm data
+#normalized
 #gcc_90
 p_gcc_90_len5_b30<-plot_2groups(df_len5_nonnorm,"gcc_90","",do_norm = FALSE)
-ggsave(paste0(save.path,"gcc_90_len5_b30_merge_smallevents.png"),p_gcc_90_len5_b30,width = 15,height = 12)
+ggsave(paste0(save.path,"gcc_90_len5_b30_nonnorm.png"),p_gcc_90_len5_b30,width = 15,height = 12)
 #rcc_90
 p_rcc_90_len5_b30<-plot_2groups(df_len5_nonnorm,"rcc_90","",do_norm = FALSE)
-ggsave(paste0(save.path,"rcc_90_len5_b30_merge_smallevents.png"),p_rcc_90_len5_b30,width = 15,height = 12)
+ggsave(paste0(save.path,"rcc_90_len5_b30_nonnorm.png"),p_rcc_90_len5_b30,width = 15,height = 12)
+
+#####
+#gcc_90
+p_gcc_90_len5_b30<-plot_2groups(df_len5_norm,"gcc_90","",do_norm = TRUE)
+ggsave(paste0(save.path,"gcc_90_len5_b30_norm.png"),p_gcc_90_len5_b30,width = 15,height = 12)
+#rcc_90
+p_rcc_90_len5_b30<-plot_2groups(df_len5_norm,"rcc_90","",do_norm = TRUE)
+ggsave(paste0(save.path,"rcc_90_len5_b30_norm.png"),p_rcc_90_len5_b30,width = 15,height = 12)
+

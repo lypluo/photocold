@@ -25,7 +25,7 @@
 align_events <- function( df,dovars,leng_threshold, before, after, nbins, do_norm=FALSE ){
   #!comment by YPL:test using some df
   # df<-df_events.years
-  # dovars<-c("vpd_day_fluxnet2015")
+  # dovars<-c("gpp_obs")
   # leng_threshold<-5
   # before=30
   # after=0
@@ -122,10 +122,10 @@ align_events <- function( df,dovars,leng_threshold, before, after, nbins, do_nor
       norm <- df_dday %>% 
         group_by( sitename, inbin ) %>%
         summarise_at( vars(one_of(dovars)), funs(median( ., na.rm=TRUE )) ) %>%
-        filter( !is.na(inbin) ) %>% 
-        filter( grepl(",0]", inbin) ) %>% 
+        dplyr::filter( !is.na(inbin) ) %>% 
+        dplyr::filter( grepl(",0]", inbin) ) %>% 
         setNames( c( "sitename", "inbin", paste0("med", dovars) ) ) %>% 
-        select(-inbin)
+        dplyr::select(-inbin)
       
       df_dday <- df_dday %>% 
         left_join(norm, by="sitename") %>% 
@@ -144,10 +144,10 @@ align_events <- function( df,dovars,leng_threshold, before, after, nbins, do_nor
         # df[[dsdovar]] <- df[[dovar]] / df[[dsdovar]]
         #changed by YP-->normalize the data as making the "dsdovar" as the standard
         df[[dsdovar]] <- c(df[[dovar]] - df[[meddovar]])/abs(df[[meddovar]])
-        return(select(df, dsdovar))
+        return(dplyr::select(df, dsdovar))
       }
       df_dday <- purrr::map_dfc(as.list(dovars), ~get_dsdovar(df_dday, .)) %>% 
-        bind_cols( select(df_dday, -one_of(dsdovars)), .)
+        bind_cols(dplyr::select(df_dday, -one_of(dsdovars)), .)
       
     } else {
       sdovars <- c()

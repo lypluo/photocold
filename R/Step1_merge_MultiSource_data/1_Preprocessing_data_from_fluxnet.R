@@ -5,7 +5,7 @@
 #(1)for fluxnet data:
 #------------------------------------
 #----------------------
-#a. unzip the zip file:
+#a. unzip the zip file:one for the sites beni send to me, one for all the available sites from Fluxnet2015
 #----------------------
 unzip_file<-function(ori.zip.path,sel_site,exdir.path){
   # ori.zip.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Fluxnet_Data/Download_data/"
@@ -29,16 +29,39 @@ unzip_file<-function(ori.zip.path,sel_site,exdir.path){
   unzip(zipfile=paste0(zip.file.name),files = files.name.inzip$Name[pos_FULL_HH],exdir=exdir.path)  
 }
 #
-ori.zip.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Fluxnet_Data/Download_data/"
-exdir.path<-'C:/Users/yluo/Desktop/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Unzip_ori_HH_data'
+ori.zip.path<-"D:/CES/Data_for_use/Fluxnet_Data/Download_data/"
+exdir.path<-'D:/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Unzip_ori_HH_data'
+
+###A. for the sites that Beni send to me before
 #load the information for the sites we focused on at this moment:
 library(readxl)
-site.info.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/"
+site.info.path<-"D:/CES/Data_for_use/"
 Meta.info<-read_excel(paste0(site.info.path,"Info_Table_about_Photocold_project.xlsx"),sheet = "ECsites_withPhenoCam")
 #
 sites_goingto_processed<-Meta.info$SiteName
 for(i in 1:length(sites_goingto_processed)){
   unzip_file(ori.zip.path,sites_goingto_processed[i],exdir.path)
+}
+
+###B.for the sites I selected for the Fluxnet2015:
+sel.sites.path<-"D:/CES/Data_for_use/Fluxnet_Data/"
+sel.sites.info<-read.csv(paste0(sel.sites.path,"fluxnet2015_sites_sel.csv"))
+#comparing the sites with A, then unzip the sites data not in A
+pos_match<-match(sites_goingto_processed,sel.sites.info$siteID)
+pos_remaining<-setdiff(c(1:length(sel.sites.info$siteID)),as.numeric(pos_match))
+sel.other.sites<-sel.sites.info$siteID[pos_remaining]
+length(sel.other.sites)
+#after checking the download data, I found the data of some sites are not available,
+#hence move them:
+sites.no.data<-c("CA-SCC","FI-Sii","RU-Fy2","RU-Sam","RU-SkP","RU-Tks","SE-Deg",
+                "US-BZS","US-Ho1","US-NGC","US-Uaf")
+pos_rm<-match(sites.no.data,sel.other.sites)
+pos_last<-setdiff(c(1:length(sel.other.sites)),pos_rm)
+sel.other.sites<-sel.other.sites[pos_last]
+length(sel.other.sites)   # 60 sites available
+for(i in 1:length(sel.other.sites)){
+  unzip_file(ori.zip.path,sel.other.sites[i],exdir.path)
+  print(i)
 }
 
 #----------------------------------------------------
@@ -47,7 +70,7 @@ for(i in 1:length(sites_goingto_processed)){
 library(lubridate)
 library(tidyverse)
 #source the function based on Beni:
-fun.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/R/Step2_merge_MultiSource_data/Functions/"
+fun.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/R/Step1_merge_MultiSource_data/Functions/"
 source(paste0(fun.path,"remove_outliers.R"))
 source(paste0(fun.path,"clean_fluxnet_gpp.R"))
 #----------------
@@ -55,7 +78,7 @@ source(paste0(fun.path,"clean_fluxnet_gpp.R"))
 #----------------
 subset_interest_vars<-function(proc.path,sel_site){
   # proc.path<-exdir.path
-  # sel_site<-"US-Wi3"
+  # sel_site<-"DK-Sor"
   
   setwd(proc.path)
   csv.names<-list.files()
@@ -72,8 +95,8 @@ subset_interest_vars<-function(proc.path,sel_site){
   #PA_F(PA_F_QC)-->atmospheric pressure:kPa
   #P_F(P_F_QC)-->precipitaiton:mm
   #WS_F(WS_F_QC)-->wind speed:m s-1
-  #PPFD_IN(PPFD_IN_QC)-->photosynthetic photon flux denstiy: umol m-2 s-1
-  #NEE_VUT_REF(NEE_VUT_REF_QC)-->umolCO2 mi-2 s-1
+  #PPFD_IN/PPFD_OUT(PPFD_IN_QC)-->photosynthetic photon flux denstiy: umol m-2 s-1
+  #NEE_VUT_REF(NEE_VUT_REF_QC)-->umolCO2 m-2 s-1
   #GPP_NT/DT_VUT_REF-->VUT:variable u*threshold REF-->reference GPP, using model efficiency approach
   #TS_F_MDS_#(TS_F_MDS_#_QC)-->soil temperature, # stands for soil depth
   #SWC_F_MDS_#(SWC_F_MDS_#_QC)-->soil water content (%)
@@ -87,13 +110,13 @@ subset_interest_vars<-function(proc.path,sel_site){
   pos_PA_F<-grep("PA_F",vars_names)
   pos_P_F<-grep("P_F",vars_names)
   pos_WS_F<-grep("WS_F",vars_names)
-  pos_PPFD_IN<-grep("PPFD_IN",vars_names)
+  pos_PPFD<-c(grep("PPFD_IN",vars_names),grep("PPFD_OUT",vars_names))
   pos_NEE_VUT_REF<-c(match("NEE_VUT_REF",vars_names),match("NEE_VUT_REF_QC",vars_names))
   pos_GPP_VUT_REF<-c(grep("GPP_NT_VUT_REF",vars_names),grep("GPP_DT_VUT_REF",vars_names))
   pos_TS_F_MDS<-grep("TS_F",vars_names)
   pos_SWC_F_MDS<-grep("SWC_F",vars_names)
   #sel vars position:
-  pos_all<-c(pos_TIMESTAMP,pos_TA,pos_SW_IN,pos_PA_F,pos_P_F,pos_WS_F,pos_PPFD_IN,
+  pos_all<-c(pos_TIMESTAMP,pos_TA,pos_SW_IN,pos_PA_F,pos_P_F,pos_WS_F,pos_PPFD,
              pos_NEE_VUT_REF,pos_GPP_VUT_REF,pos_TS_F_MDS,pos_SWC_F_MDS)
   df_sel<-df[,pos_all]
   #tidy the format for the half hourly data:
@@ -123,7 +146,8 @@ subset_interest_vars<-function(proc.path,sel_site){
 #b2. put the selected variables from different sites into a data.frame
 #----------------
 library(dplyr)
-proc.path<-'C:/Users/yluo/Desktop/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Unzip_ori_HH_data'
+proc.path<-'D:/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Unzip_ori_HH_data'
+###I.for the sites accoring to the data sent by Beni:
 df_all<-c()
 for(i in 1:length(Meta.info$SiteName)){
   df.temp<-subset_interest_vars(proc.path = proc.path,Meta.info$SiteName[i])  
@@ -137,11 +161,30 @@ for(i in 1:length(Meta.info$SiteName)){
   }
   rm(df.temp)
 }
+###II.for the other available sites in Fluxnet2015:
+df_all_others<-c()
+for(i in 1:length(sel.other.sites)){
+  df.temp<-subset_interest_vars(proc.path = proc.path,sel.other.sites[i])  
+  df.temp<-data.frame(sitename=rep(sel.other.sites[i],nrow(df.temp)),df.temp)
+  #using dplyr::bind_rows(df1, df2) to bind two sites that might have different variable numbers
+  if(i==1){
+    df_all_others<-df.temp
+  }
+  if(i>1){
+    df_all_others<-bind_rows(df_all_others,df.temp)
+  }
+  rm(df.temp)
+  print(i)
+}
+
 #----------------
 #b3.save the preprocessed selected HH data
 #----------------
-save.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Preprocessed_data/"
+#the sites according Beni' datasets
+save.path<-"D:/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Preprocessed_data/"
 save(df_all,file=paste0(save.path,"HH_data.RDA"))
+#for the other available sites in Fluxnet2015:
+save(df_all_others,file=paste0(save.path,"Other_sites/HH_data.RDA"))
 
 #----------------------------------------------------
 #c.summary the HH data to daily data:
@@ -150,9 +193,11 @@ library(plyr)
 #----------------
 #c1.summary half-hourly to daily data for each site
 #----------------
+#I.for the sites accoring to the data sent by Beni:
 #first to select the variables interested:
 sel_variables<-c("sitename","TIMESTAMP_START","TA_F","SW_IN_F",
-                 "PA_F","P_F","WS_F","PPFD_IN","NEE_VUT_REF",
+                 "PA_F","P_F","WS_F","PPFD_IN","PPFD_OUT",
+                 "NEE_VUT_REF",
                  "GPP_NT_VUT_REF","GPP_DT_VUT_REF",
                  paste0("TS_F_MDS_",c(1:9)),paste0("SWC_F_MDS_",c(1:5)))
 df_all_sel<-df_all[,sel_variables]
@@ -162,7 +207,9 @@ df_all_sel$Date<-format(df_all_sel$TIMESTAMP_START,format = "%Y-%m-%d")
 df_all_sel_daily<-ddply(df_all_sel,.(sitename,Date),summarise,
   Ta_mean=mean(TA_F,na.rm = T),TA_min=min(TA_F,na.rm = T),TA_max=max(TA_F,na.rm = T),
   SW_IN_mean=mean(SW_IN_F,na.rm = T),PA_mean=mean(PA_F,na.rm = T),P=sum(P_F,na.rm = T),
-  WS_mean=mean(WS_F,na.rm = T),PPFD_IN_mean=mean(PPFD_IN,na.rm = T),NEE_mean=mean(NEE_VUT_REF,na.rm=T),
+  WS_mean=mean(WS_F,na.rm = T),
+  PPFD_IN_mean=mean(PPFD_IN,na.rm = T),PPFD_OUT_mean=mean(PPFD_OUT,na.rm = T),
+  NEE_mean=mean(NEE_VUT_REF,na.rm=T),
   GPP_NT_mean=mean(GPP_NT_VUT_REF,na.rm = T),GPP_DT_mean=mean(GPP_DT_VUT_REF,na.rm = T),
   TS_1_mean=mean(TS_F_MDS_1,na.rm = T),TS_2_mean=mean(TS_F_MDS_2,na.rm = T),
   TS_3_mean=mean(TS_F_MDS_3,na.rm = T),TS_4_mean=mean(TS_F_MDS_4,na.rm = T),
@@ -173,20 +220,60 @@ df_all_sel_daily<-ddply(df_all_sel,.(sitename,Date),summarise,
 )
 #checke the non NAs in each variable
 apply(df_all_sel_daily[,-c(1:2)],2,function(x){sum(!is.na(x))})
+
+#II.for the other available sites from Fluxnet2015
+#first to select the variables interested:
+sel_variables<-c("sitename","TIMESTAMP_START","TA_F","SW_IN_F",
+                 "PA_F","P_F","WS_F","PPFD_IN","PPFD_OUT",
+                 "NEE_VUT_REF",
+                 "GPP_NT_VUT_REF","GPP_DT_VUT_REF",
+                 paste0("TS_F_MDS_",c(1:9)),paste0("SWC_F_MDS_",c(1:7)))
+df_all_others_sel<-df_all_others[,sel_variables]
+#merge to daily
+df_all_others_sel$Date<-format(df_all_others_sel$TIMESTAMP_START,format = "%Y-%m-%d")
+#summarize the data to daily 
+df_all_others_sel_daily<-ddply(df_all_others_sel,.(sitename,Date),summarise,
+                        Ta_mean=mean(TA_F,na.rm = T),TA_min=min(TA_F,na.rm = T),TA_max=max(TA_F,na.rm = T),
+                        SW_IN_mean=mean(SW_IN_F,na.rm = T),PA_mean=mean(PA_F,na.rm = T),P=sum(P_F,na.rm = T),
+                        WS_mean=mean(WS_F,na.rm = T),
+                        PPFD_IN_mean=mean(PPFD_IN,na.rm = T),PPFD_OUT_mean=mean(PPFD_OUT,na.rm = T),
+                        NEE_mean=mean(NEE_VUT_REF,na.rm=T),
+                        GPP_NT_mean=mean(GPP_NT_VUT_REF,na.rm = T),GPP_DT_mean=mean(GPP_DT_VUT_REF,na.rm = T),
+                        TS_1_mean=mean(TS_F_MDS_1,na.rm = T),TS_2_mean=mean(TS_F_MDS_2,na.rm = T),
+                        TS_3_mean=mean(TS_F_MDS_3,na.rm = T),TS_4_mean=mean(TS_F_MDS_4,na.rm = T),
+                        TS_5_mean=mean(TS_F_MDS_5,na.rm = T),TS_6_mean=mean(TS_F_MDS_6,na.rm = T),
+                        TS_7_mean=mean(TS_F_MDS_7,na.rm = T),TS_8_mean=mean(TS_F_MDS_8,na.rm = T),TS_9_mean=mean(TS_F_MDS_9,na.rm = T),
+                        SWC_1_mean=mean(SWC_F_MDS_1,na.rm = T),SWC_2_mean=mean(SWC_F_MDS_2,na.rm = T),
+                        SWC_3_mean=mean(SWC_F_MDS_3,na.rm = T),SWC_4_mean=mean(SWC_F_MDS_4,na.rm = T),
+                        SWC_5_mean=mean(SWC_F_MDS_5,na.rm = T),SWC_6_mean=mean(SWC_F_MDS_6,na.rm = T),
+                        SWC_5_mean=mean(SWC_F_MDS_7,na.rm = T)
+)
+#checke the non NAs in each variable
+apply(df_all_others_sel_daily[,-c(1:2)],2,function(x){sum(!is.na(x))})
+
 #----------------
 #c2.save the preprocessed daily data
 #----------------
-save.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Preprocessed_data/"
+#I.for the sites accoring to the data sent by Beni:
+save.path<-"D:/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Preprocessed_data/"
 save(df_all_sel_daily,file=paste0(save.path,"Daily_data.RDA"))
+#II.for the other available sites from Fluxnet2015
+save(df_all_others_sel_daily,file=paste0(save.path,"Other_sites/Daily_data.RDA"))
+#III.merge all the sites:
+df_all_sel_daily$Date<-ymd(df_all_sel_daily$Date)
+df_all_others_sel_daily$Date<-ymd(df_all_others_sel_daily$Date)
+df_all_daily<-dplyr::bind_rows(df_all_sel_daily,df_all_others_sel_daily)
+save(df_all_daily,file=paste0(save.path,"All_sites/Daily_data.RDA"))
 
 #----------------------------------------------------
 #d.comparing the processed results with provided data by Beni
+#-->this analysis is mainly for the sites according to the data sent by Beni:
 #----------------------------------------------------
 #load the Beni's data
-load.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Data_sent_by_Beni/"
+load.path<-"D:/CES/Data_for_use/Data_sent_by_Beni/"
 df_Beni<-read.csv(file=paste0(load.path,"ddf_fluxnet2015_pmodel_with_forcings_stocker19gmd.csv"))
 #finding the corresponding sites between "df_Beni"and "df_all_sel_daily"
-sel_sites<-unique(df_all_sel_daily$sitename)
+sel_sites<-intersect(unique(df_all_daily$sitename),unique(df_Beni$sitename))
 #
 df_Beni_sel<-c()
 for(i in 1:length(sel_sites)){
@@ -199,7 +286,7 @@ df_Beni_sel$date<-mdy(df_Beni_sel$date)
 #----------------
 library(ggplot2)
 compare_vars<-function(df_YP_daily,df_Beni_daily,var_in_YP,var_in_Beni){
-  # df_YP_daily<-df_all_sel_daily
+  # df_YP_daily<-df_all_daily
   # df_Beni_daily<-df_Beni_sel
   # var_in_YP<-"GPP_NT_mean"
   # var_in_Beni<-"gpp_obs"
@@ -225,16 +312,20 @@ compare_vars<-function(df_YP_daily,df_Beni_daily,var_in_YP,var_in_Beni){
   return(p_out)
 }
 ####
+#before comparing-->convert the unit:
+#convert the unit of GPP from umol m-2 s-1 to gC m-2 d-1
+df_all_daily$GPP_NT_mean<-df_all_daily$GPP_NT_mean*24*3600*12/1000000
+df_all_daily$GPP_DT_mean<-df_all_daily$GPP_DT_mean*24*3600*12/1000000
 #for GPP
-p_gpp<-compare_vars(df_all_sel_daily,df_Beni_sel,"GPP_NT_mean","gpp_obs")
-p_ppfd<-compare_vars(df_all_sel_daily,df_Beni_sel,"PPFD_IN_mean","ppfd_fluxnet2015")
-p_temp<-compare_vars(df_all_sel_daily,df_Beni_sel,"Ta_mean","temp_day_fluxnet2015")
-p_preci<-compare_vars(df_all_sel_daily,df_Beni_sel,"P","prec_fluxnet2015")
-p_patm<-compare_vars(df_all_sel_daily,df_Beni_sel,"PA_mean","patm_fluxnet2015")
+p_gpp<-compare_vars(df_all_daily,df_Beni_sel,"GPP_NT_mean","gpp_obs")
+p_ppfd<-compare_vars(df_all_daily,df_Beni_sel,"PPFD_IN_mean","ppfd_fluxnet2015")
+p_temp<-compare_vars(df_all_daily,df_Beni_sel,"Ta_mean","temp_day_fluxnet2015")
+p_preci<-compare_vars(df_all_daily,df_Beni_sel,"P","prec_fluxnet2015")
+p_patm<-compare_vars(df_all_daily,df_Beni_sel,"PA_mean","patm_fluxnet2015")
 
 library(cowplot)
 p_merge<-plot_grid(p_gpp,p_ppfd,p_temp,p_preci,p_patm,
           labels = "auto",ncol=2,label_size = 12,align = "hv")
 #save the plot
 save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_Beni_YP/"
-ggsave(paste0(save.path,"p_merge.png"),p_merge,width = 15,height = 12)
+ggsave(paste0(save.path,"p_merge_update_Aug12.png"),p_merge,width = 15,height = 12)
