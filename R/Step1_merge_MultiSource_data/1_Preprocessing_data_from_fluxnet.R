@@ -70,14 +70,14 @@ for(i in 1:length(sel.other.sites)){
 library(lubridate)
 library(tidyverse)
 #source the function based on Beni:
-fun.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/R/Step1_merge_MultiSource_data/Functions/"
+fun.path<-"D:/Github/photocold/R/Step1_merge_MultiSource_data/Functions/"
 source(paste0(fun.path,"remove_outliers.R"))
 source(paste0(fun.path,"clean_fluxnet_gpp.R"))
 #----------------
 #b1. write a function
 #----------------
 subset_interest_vars<-function(proc.path,sel_site){
-  # proc.path<-exdir.path
+  # proc.path<-'D:/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Unzip_ori_HH_data'
   # sel_site<-"DK-Sor"
   
   setwd(proc.path)
@@ -111,12 +111,13 @@ subset_interest_vars<-function(proc.path,sel_site){
   pos_P_F<-grep("P_F",vars_names)
   pos_WS_F<-grep("WS_F",vars_names)
   pos_PPFD<-c(grep("PPFD_IN",vars_names),grep("PPFD_OUT",vars_names))
+  pos_VPD<-grep("VPD_F",vars_names)
   pos_NEE_VUT_REF<-c(match("NEE_VUT_REF",vars_names),match("NEE_VUT_REF_QC",vars_names))
   pos_GPP_VUT_REF<-c(grep("GPP_NT_VUT_REF",vars_names),grep("GPP_DT_VUT_REF",vars_names))
   pos_TS_F_MDS<-grep("TS_F",vars_names)
   pos_SWC_F_MDS<-grep("SWC_F",vars_names)
   #sel vars position:
-  pos_all<-c(pos_TIMESTAMP,pos_TA,pos_SW_IN,pos_PA_F,pos_P_F,pos_WS_F,pos_PPFD,
+  pos_all<-c(pos_TIMESTAMP,pos_TA,pos_SW_IN,pos_PA_F,pos_P_F,pos_WS_F,pos_PPFD,pos_VPD,
              pos_NEE_VUT_REF,pos_GPP_VUT_REF,pos_TS_F_MDS,pos_SWC_F_MDS)
   df_sel<-df[,pos_all]
   #tidy the format for the half hourly data:
@@ -180,6 +181,12 @@ for(i in 1:length(sel.other.sites)){
 #----------------
 #b3.save the preprocessed selected HH data
 #----------------
+#some unit conversion: convert VPD (hPa)-->to VPD (Pa)
+df_all$VPD_F<-df_all$VPD_F*100
+df_all$VPD_F_MDS<-df_all$VPD_F_MDS*100
+#
+df_all_others$VPD_F<-df_all_others$VPD_F*100
+df_all_others$VPD_F_MDS<-df_all_others$VPD_F_MDS*100
 #the sites according Beni' datasets
 save.path<-"D:/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Preprocessed_data/"
 save(df_all,file=paste0(save.path,"HH_data.RDA"))
@@ -196,19 +203,24 @@ library(plyr)
 #I.for the sites accoring to the data sent by Beni:
 #first to select the variables interested:
 sel_variables<-c("sitename","TIMESTAMP_START","TA_F","SW_IN_F",
-                 "PA_F","P_F","WS_F","PPFD_IN","PPFD_OUT",
+                 "PA_F","P_F","WS_F","PPFD_IN","PPFD_OUT","VPD_F",
                  "NEE_VUT_REF",
                  "GPP_NT_VUT_REF","GPP_DT_VUT_REF",
                  paste0("TS_F_MDS_",c(1:9)),paste0("SWC_F_MDS_",c(1:5)))
 df_all_sel<-df_all[,sel_variables]
 #merge to daily
 df_all_sel$Date<-format(df_all_sel$TIMESTAMP_START,format = "%Y-%m-%d")
+df_all_sel$HH<-hour(df_all_sel$TIMESTAMP_START)
 #summarize the data to daily 
+#for VPD,only using the data in the day time (HH>=6 <=18)-->set the VPD value == NA for non-day 
+df_all_sel[df_all_sel$HH<6 | df_all_sel$HH>18,]$VPD_F<-NA
+
 df_all_sel_daily<-ddply(df_all_sel,.(sitename,Date),summarise,
   Ta_mean=mean(TA_F,na.rm = T),TA_min=min(TA_F,na.rm = T),TA_max=max(TA_F,na.rm = T),
   SW_IN_mean=mean(SW_IN_F,na.rm = T),PA_mean=mean(PA_F,na.rm = T),P=sum(P_F,na.rm = T),
   WS_mean=mean(WS_F,na.rm = T),
   PPFD_IN_mean=mean(PPFD_IN,na.rm = T),PPFD_OUT_mean=mean(PPFD_OUT,na.rm = T),
+  VPD_day_mean=mean(VPD_F,na.rm=T),
   NEE_mean=mean(NEE_VUT_REF,na.rm=T),
   GPP_NT_mean=mean(GPP_NT_VUT_REF,na.rm = T),GPP_DT_mean=mean(GPP_DT_VUT_REF,na.rm = T),
   TS_1_mean=mean(TS_F_MDS_1,na.rm = T),TS_2_mean=mean(TS_F_MDS_2,na.rm = T),
@@ -224,7 +236,7 @@ apply(df_all_sel_daily[,-c(1:2)],2,function(x){sum(!is.na(x))})
 #II.for the other available sites from Fluxnet2015
 #first to select the variables interested:
 sel_variables<-c("sitename","TIMESTAMP_START","TA_F","SW_IN_F",
-                 "PA_F","P_F","WS_F","PPFD_IN","PPFD_OUT",
+                 "PA_F","P_F","WS_F","PPFD_IN","PPFD_OUT","VPD_F",
                  "NEE_VUT_REF",
                  "GPP_NT_VUT_REF","GPP_DT_VUT_REF",
                  paste0("TS_F_MDS_",c(1:9)),paste0("SWC_F_MDS_",c(1:7)))
@@ -232,11 +244,14 @@ df_all_others_sel<-df_all_others[,sel_variables]
 #merge to daily
 df_all_others_sel$Date<-format(df_all_others_sel$TIMESTAMP_START,format = "%Y-%m-%d")
 #summarize the data to daily 
+#for VPD,only using the data in the day time (HH>=6 <=18)-->set the VPD value == NA for non-day 
+df_all_others_sel[df_all_others_sel$HH<6 | df_all_others_sel$HH>18,]$VPD_F<-NA
 df_all_others_sel_daily<-ddply(df_all_others_sel,.(sitename,Date),summarise,
                         Ta_mean=mean(TA_F,na.rm = T),TA_min=min(TA_F,na.rm = T),TA_max=max(TA_F,na.rm = T),
                         SW_IN_mean=mean(SW_IN_F,na.rm = T),PA_mean=mean(PA_F,na.rm = T),P=sum(P_F,na.rm = T),
                         WS_mean=mean(WS_F,na.rm = T),
                         PPFD_IN_mean=mean(PPFD_IN,na.rm = T),PPFD_OUT_mean=mean(PPFD_OUT,na.rm = T),
+                        VPD_day_mean=mean(VPD_F,na.rm=T),
                         NEE_mean=mean(NEE_VUT_REF,na.rm=T),
                         GPP_NT_mean=mean(GPP_NT_VUT_REF,na.rm = T),GPP_DT_mean=mean(GPP_DT_VUT_REF,na.rm = T),
                         TS_1_mean=mean(TS_F_MDS_1,na.rm = T),TS_2_mean=mean(TS_F_MDS_2,na.rm = T),
@@ -322,10 +337,11 @@ p_ppfd<-compare_vars(df_all_daily,df_Beni_sel,"PPFD_IN_mean","ppfd_fluxnet2015")
 p_temp<-compare_vars(df_all_daily,df_Beni_sel,"Ta_mean","temp_day_fluxnet2015")
 p_preci<-compare_vars(df_all_daily,df_Beni_sel,"P","prec_fluxnet2015")
 p_patm<-compare_vars(df_all_daily,df_Beni_sel,"PA_mean","patm_fluxnet2015")
+p_vpd<-compare_vars(df_all_daily,df_Beni_sel,"VPD_day_mean","vpd_day_fluxnet2015")
 
 library(cowplot)
-p_merge<-plot_grid(p_gpp,p_ppfd,p_temp,p_preci,p_patm,
+p_merge<-plot_grid(p_gpp,p_ppfd,p_temp,p_preci,p_patm,p_vpd,
           labels = "auto",ncol=2,label_size = 12,align = "hv")
 #save the plot
-save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_Beni_YP/"
-ggsave(paste0(save.path,"p_merge_update_Aug12.png"),p_merge,width = 15,height = 12)
+# save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_Beni_YP/"
+# ggsave(paste0(save.path,"p_merge_update_Aug12.png"),p_merge,width = 15,height = 12)

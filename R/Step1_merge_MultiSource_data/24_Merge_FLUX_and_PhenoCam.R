@@ -6,19 +6,20 @@
 #------------------------------------
 library(lubridate)
 ##load the processed fluxnet sites data done by me:
-load.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Preprocessed_data/"
+load.path<-"D:/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Preprocessed_data/"
 load(paste0(load.path,"Daily_data.RDA"))
 df_YP_daily<-df_all_sel_daily
 df_YP_daily$Date<-ymd(df_YP_daily$Date)
 #rename the variables:
 names(df_YP_daily)<-c("sitename","date","temp_mean_fluxnet2015","temp_min_fluxnet2015","temp_max_fluxnet2015",
-      "SW_IN_fluxnet2015","patm_fluxnet2015","prec_fluxnet2015","ws_fluxnet2015","ppfd_fluxnet2015","nee","gpp_nt","gpp_dt",
+      "SW_IN_fluxnet2015","patm_fluxnet2015","prec_fluxnet2015","ws_fluxnet2015","ppfd_fluxnet2015",
+      "nee","gpp_nt","gpp_dt","vpd_day_fluxnet2015",
       "TS_1_fluxnet2015","TS_2_fluxnet2015","TS_3_fluxnet2015","TS_4_fluxnet2015","TS_5_fluxnet2015","TS_6_fluxnet2015",
       "TS_7_fluxnet2015","TS_8_fluxnet2015","TS_9_fluxnet2015",
       "SWC_1_fluxnet2015","SWC_2_fluxnet2015","SWC_3_fluxnet2015","SWC_4_fluxnet2015","SWC_5_fluxnet2015")
 
 ##load Beni processed data:
-load.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Data_sent_by_Beni/"
+load.path<-"D:/CES/Data_for_use/Data_sent_by_Beni/"
 df_Beni<-read.csv(file=paste0(load.path,"ddf_fluxnet2015_pmodel_with_forcings_stocker19gmd.csv"))
 #finding the corresponding sites between "df_Beni"and "df_all_sel_daily"
 sel_sites<-unique(df_all_sel_daily$sitename)

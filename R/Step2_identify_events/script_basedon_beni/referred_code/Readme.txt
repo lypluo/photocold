@@ -5,3 +5,6 @@
 2.comp_vars_box_plot.R --> plot the results with the box-plot to intutively to show the results
 3.comp_vars_quantile_plot.R-->plot the results to plot qunatile plot referring Figure 6 in Beni's paper: 
    https://nph.onlinelibrary.wiley.com/doi/full/10.1111/nph.15123
+
+##
+The code in this folder are previous code used for analyzed data, now mainly for references.

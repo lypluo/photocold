@@ -6,6 +6,9 @@
 #------------------------------------
 #(1)explore data avaiablity
 #------------------------------------
+# installing the package from the GitHub repo
+if(!require(devtools)) install.packages('devtools')
+devtools::install_github('bnasr/phenocamapi')
 #load package
 library(data.table)
 library(phenocamapi)
