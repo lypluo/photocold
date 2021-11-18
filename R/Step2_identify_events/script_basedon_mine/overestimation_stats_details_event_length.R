@@ -3,17 +3,20 @@
 #-------------------------------------------------------------------------
 #(1)load the data
 #-------------------------------------------------------------------------
-load.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Data_sent_by_Beni/"
+load.path<-"D:/CES/Data_for_use/Data_sent_by_Beni/"
 #from new method:
 load(paste0(load.path,"ddf_labeled_norm_trs_newmethod_all_overestimation.RDA"))
 df_norm_trs_newM_oversites<-ddf_labeled;rm(ddf_labeled)  #sites flagged as Beni that have the gpp overestimation in the spring 
 load(paste0(load.path,"ddf_labeled_norm_trs_newmethod_sites_flag_without_overestimation.RDA"))
 df_norm_trs_newM_no_oversites<-ddf_labeled;rm(ddf_labeled)  #sites flagged as Beni that do not have the gpp overestimation in the spring
+load(paste0(load.path,"ddf_labeled_norm_trs_newmethod_all_overestimation_beyondsites.RDA"))
+df_norm_trs_newM_beyond_sites<-ddf_labeled;rm(ddf_labeled)  #sites beyond Beni's datasets
 #------------------------------------------------------------------------
 #(2)select the stats such as "is_event"
 #------------------------------------------------------------------------
 df_oversites_sel<-df_norm_trs_newM_oversites[,c("sitename","date","doy","Year","greenup","is_event","is_event_less10")]
 df_no_oversites_sel<-df_norm_trs_newM_no_oversites[,c("sitename","date","doy","Year","greenup","is_event","is_event_less10")]
+df_beyondsites_sel<-df_norm_trs_newM_beyond_sites[,c("sitename","date","doy","Year","greenup","is_event","is_event_less10")]
 #------------------------------------------------------------------------
 #(3)summary the events stats:
 #------------------------------------------------------------------------
@@ -42,10 +45,12 @@ summary_fun<-function(df){
 ##
 df_oversites_events<-summary_fun(df_oversites_sel)
 df_no_oversites_events<-summary_fun(df_no_oversites_sel)
-#merge two datasets--but add the flag
+df_beyondsites_events<-summary_fun(df_beyondsites_sel)
+#merge the datasets--and add the flag
 df_oversites_events$flag<-rep("Oversites",length(df_oversites_events$sitename))
 df_no_oversites_events$flag<-rep("No_oversites",length(df_no_oversites_events$sitename))
-df_events_all<-rbind(df_oversites_events,df_no_oversites_events)
+df_beyondsites_events$flag<-rep("Beyondsites",length(df_beyondsites_events$sitename))
+df_events_all<-rbind(rbind(df_oversites_events,df_no_oversites_events),df_beyondsites_events)
 #------------------------------------------------------------------------
 #(4)plotting
 #---------------------------------
@@ -69,7 +74,7 @@ p_length<-ggplot(data=df.events_length,aes(x=length_type,y=length,fill=length_ty
 p_length_flag<-ggplot()+
   geom_violin(data=df.events_length,aes(x=length_type,y=length,fill=length_type,col=flag),trim=TRUE, position = position_dodge(0.9) )+
   geom_boxplot(data=df.events_length,aes(x=length_type,y=length,fill=length_type,col=flag), width=0.1, position = position_dodge(0.9) )+ 
-  scale_color_manual(values = c("Oversites"="black", "No_oversites"="gray40"))+
+  scale_color_manual(values = c("Oversites"="black", "No_oversites"="gray40","Beyondsites"="gray80"))+
   geom_hline(yintercept = c(15,30,45,60,75),col="gray",lty=2,lwd=1.2)+
   theme_classic()+
   theme(legend.position = c(0.8,0.8),
@@ -80,12 +85,12 @@ p_length_flag<-ggplot()+
 library(ggpubr)
 library(gridExtra)
 p_merge<-ggarrange(p_length,p_length_flag,nrow=2,align = "hv")
-#save the plot
-save.path<-"C:/Users/yluo/Documents/GitHub/photocold/plot/"
+#save the plot-->need to check why the plot cannot save:Nov.17,2021
+save.path<-"D:/CES/code/R_testcode/PhotoCold/Second_round_of_code/plot/stats_plot/"
 plot(p_merge)
 ggsave(file=paste0(save.path,"Events_lengths_comparison_update.png"),p_merge,dev="png",width = 10,height=10)
 #---------------------------------
 ##(5)save the df.events_length(information of site-years)
 #---------------------------------
-save.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/event_length/"
+save.path<-"D:/CES/Data_for_use/event_length/"
 save(df_events_all,file=paste0(save.path,"df_events_length.RDA"))

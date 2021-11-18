@@ -7,7 +7,7 @@ output: html_document
 
 ## Description
 
-**After exploring the general pattern of modelling GPP vs observational GPP, the next step to identify the specific period when the mismatch between modeled GPP and observed GPP in each site-->focused in the markdown file**
+**After exploring the general pattern of modelling GPP vs observational GPP, the next step to identify the specific period when the mismatch between modeled GPP and observed GPP in each site-->focused in the markdown file-->focus on the prelimianry selected sites by Beni**
 
 step1: tidy the table for GPP simulation vs GPP obs sites
 
@@ -17,7 +17,7 @@ step2: finding the way to separate out the model early simulation period
 ```{r}
 library(kableExtra)
 library("readxl")
-table.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/"
+table.path<-"D:/CES/Data_for_use/"
 my_data <- read_excel(paste0(table.path,"Info_Table_about_Photocold_project.xlsx"), sheet = "Only_sites_earlyGPPest")
 # my_data %>%
 # kbl(caption = "Summary of sites with early GPP estimation") %>%
@@ -41,11 +41,11 @@ library(tidyr)
 library(cowplot)
 
 #original path to Beni's datasets
-# path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Data_sent_by_Beni/"
+# path<-"D:/CES/Data_for_use/Data_sent_by_Beni/"
 # setwd(path)
 # ddf <- read_csv(paste0(path,"/ddf_fluxnet2015_pmodel_with_forcings_stocker19gmd.csv"))
 #path to merge datatasets:
-path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Merge_Data/"
+path<-"D:/CES/Data_for_use/Merge_Data/"
 load(paste0(path,"Merged_Flux_and_PhenoCam.RDA"))
 ddf<-df_merge;rm(df_merge)
 #convert the format of date
@@ -87,8 +87,9 @@ Deter_greenup<-function(df,pos_max){
   trs_25_sos<-mn_sos+0.25*amp_sos
    
   #2)determine the start of season(sos10, and sos25)
-  sos10<-which.min(abs(as.numeric(df_sel_sos$gpp_mod_norm_sm - trs_10_sos)))
-  sos25<-which.min(abs(as.numeric(df_sel_sos$gpp_mod_norm_sm - trs_25_sos)))
+  N_length<-length(df_sel_sos$gpp_mod_norm_sm)
+  sos10<-which.min(abs(as.numeric(df_sel_sos$gpp_mod_norm_sm[60:N_length] - trs_10_sos)))+59
+  sos25<-which.min(abs(as.numeric(df_sel_sos$gpp_mod_norm_sm[60:N_length] - trs_25_sos)))+59
   #3)the end of the green-up period
   peak<-pos_max
   #4)additional:also determine eos10 and eos25
@@ -254,7 +255,7 @@ sep_data_indiffY_sepMismatch<-function(ddf,degf,Clim,PFT,site_name,avai_years){
     
     #B.
     #b1.add one column to indciate "is_event"
-    #set the biases(gppmod-gppobs) are positive and bigger than 1.2sd as the "is_event"
+    #set the biases(gppmod-gppobs) are positive and bigger than 3sd as the "is_event"
     df_subset$gpp_res<-df_subset$gpp_mod_roll20-df_subset$gpp_obs_roll20
     #remove the NA
     # df_subset_rmNA<-df_subset[!is.na(df_subset$gpp_res),]
@@ -549,7 +550,7 @@ for(i in 1:length(df_all)){
   ddf_labeled<-rbind(ddf_labeled,df_all[[i]]$df_agg)
 }
 #save the data:
-save.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Data_sent_by_Beni/"
+save.path<-"D:/CES/Data_for_use/Data_sent_by_Beni/"
 save(ddf_labeled,file=paste0(save.path,"ddf_labeled_norm_trs_newmethod_all_overestimation.RDA"))
 save(df_all,file=paste0(save.path,"df_all_results/df_all_norm_trs_newmethod_all_overestimation.RDA"))
 
@@ -571,7 +572,7 @@ save(df_all,file=paste0(save.path,"df_all_results/df_all_norm_trs_newmethod_all_
     #followed analysis is based on the normlized "GPP_mod"time series(determine earlier sos)
     
     - using the normalized GPP_mod to determine sos,eos and peak of the time series (using the threshold, percentile 10 of amplitude, to determine the sos and eos in this study). We selected the GPP_mod to determine the phenophases as genearlly we can get earlier sos compared to GPP_obs--> we can have larger analysis period
-    
+    - update in Aug,31,2011-->limit the sos late than Feburary(Doy:60)-->in order to remove some unrelastic sos
     
     **Step 3:rolling mean of GPPobs and GPPmod for data for all the years(moving windown:5,7,10, 15, 20days)**
     

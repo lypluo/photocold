@@ -6,7 +6,7 @@
 library(plyr)
 # library(dplyr)
 ##load the event_length data
-load.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/event_length/"
+load.path<-"D:/CES/Data_for_use/event_length/"
 load(paste0(load.path,"df_events_length.RDA"))
 # a function to separate out the site-year that event_length higher than some thresholds(e.g. 30 days)
 sep_siteyears<-function(df,sep_var,sep_thrs){
@@ -32,7 +32,7 @@ df.sep60<-sep_siteyears(df_events_all,"Over_days_length",60)
 #-------------------------------------------------------------------------
 #(2)load the all the site-years data and separate the data between the site with "is_event" and "no is_event(length<=30)"
 #-------------------------------------------------------------------------
-load.path<-"C:/Users/yluo/Desktop/CES/Data_for_use/Data_sent_by_Beni/"
+load.path<-"D:/CES/Data_for_use/Data_sent_by_Beni/"
 #from new method:
 load(paste0(load.path,"ddf_labeled_norm_trs_newmethod_all_overestimation.RDA"))
 df_norm_trs_newM_oversites<-ddf_labeled;rm(ddf_labeled)  #sites flagged as Beni that have the gpp overestimation in the spring 
@@ -296,7 +296,7 @@ plot_2groups<-function(df.GS,df.EVENT,df.EVENT10,comp_var,var_unit){
     return(p_merge)
 }
 #save the plot
-save.path<-"C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/plot/comp_vars/"
+save.path<-"D:/CES/code/R_testcode/PhotoCold/Second_round_of_code/plot/comp_vars/"
 #b1.check for the gpp_obs
 #gpp_obs_sep20
 p_gpp_obs_sep20<-plot_2groups(df.sep20_GS,df.sep20_EVENT,df.sep20_EVENT10,"gpp_obs","(gC m-2)")
@@ -411,3 +411,4 @@ ggsave(paste0(save.path,"gcc_90_sep20.png"),p_gcc_90_sep20,width = 15,height = 1
 #for rcc
 p_rcc_90_sep20<-plot_2groups(df.sep30_GS,df.sep20_EVENT,df.sep20_EVENT10,"rcc_90","")
 ggsave(paste0(save.path,"rcc_90_sep20.png"),p_rcc_90_sep20,width = 15,height = 12)
+

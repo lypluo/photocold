@@ -164,7 +164,7 @@ source(paste0(fun.path,"Difference_test_for_2Classes.R"))
 
 plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
     # df<-df_len5_nonnorm
-    # comp_var<-"gpp_obs"
+    # comp_var<-"temp_min_fluxnet2015"
     # var_unit<-"()"
     # do_norm<-FALSE
     # do_legend<-FALSE
@@ -374,7 +374,7 @@ p_temp_day_len5_b60$plot<-p_temp_day_len5_b60$plot+
   ylab("Mean Ta (°C)")+
   ylim(-25,25)
 p_temp_max_len5_b60$plot<-p_temp_max_len5_b60$plot+
-  ylab("Mean Ta (°C)")+
+  ylab("Maximum Ta (°C)")+
   ylim(-25,25)
 p_prec_len5_b60$plot<-p_prec_len5_b60$plot+
   ylab("prec (mm)")
