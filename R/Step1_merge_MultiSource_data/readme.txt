@@ -1,5 +1,5 @@
 0. Selecting the EC sites that are going to be analyzed:
-   0_Basic_description_Fluxnet2015.R
+   0_Basic_description_Fluxnet_sites.R
 1. Basic information about the analyzed sites:
 1) Preprocessing_data_from_fluxnet:
    1_Preprocessing_data_from_fluxnet.R
