@@ -109,7 +109,7 @@ Deter_greenup<-function(df,pos_max){
 }
 # 
 ##function to seprate the early GPP estimation period:
-#after checking the data(data avaiablity, data quality) in all the sites-->at the end, I selecting 21 sites at end:
+#after checking the data(data avaiablity, data quality) in all the sites(47 sites)-->at the end, I selecting 39 sites at end:
 
 sep_data_indiffY_sepMismatch<-function(ddf,degf,Clim,PFT,site_name,avai_years){
   # ddf<-ddf
@@ -362,20 +362,20 @@ sep_data_indiffY_sepMismatch<-function(ddf,degf,Clim,PFT,site_name,avai_years){
 }
 ```
 
-### Part 2: check all the sites 
+### Part 2: check all the sites (47 sites-->used 39 sites at the end)
 ```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
 #test
-df_andPlot_Cfb_DBF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","DBF","DE-Hai",c(2002:2012))
-length(df_andPlot_Dfc_GRA$p_isevent)
-p_diffYears<-df_andPlot_Cfb_DBF$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
-          p_diffYears[[10]],p_diffYears[[11]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-plot(p_merge)
+# df_andPlot_Cfb_DBF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","DBF","DE-Hai",c(2002:2012))
+# length(df_andPlot_Dfc_GRA$p_isevent)
+# p_diffYears<-df_andPlot_Cfb_DBF$p_isevent
+# p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+#           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+#           p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+#           p_diffYears[[10]],p_diffYears[[11]],
+#           labels = "auto",ncol=3,label_size = 12,align = "hv")
+# plot(p_merge)
 ```
-**(1) For Cfa:both for DBF, MF, and ENF sites(5 sites)**
+**(1) For Cfa:both for DBF, MF, and ENF sites(5 sites-->used 5 sites at the end)**
 ```{r}
 my_data_Cfa<-my_data[my_data$koeppen_code=="Cfa",]
 ```
@@ -420,7 +420,7 @@ plot(p_merge)
 - Cfa-MF (1 site)
 ```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
 #JP-SMF-->successful
-df_andPlot_Cfa_MF<-sep_data_indiffY_sepMismatch(ddf0.05,"Cfa","MF","JP-SMF",c(2003:2006))
+df_andPlot_Cfa_MF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfa","MF","JP-SMF",c(2003:2006))
 length(df_andPlot_Cfa_MF$p_isevent)
 p_diffYears<-df_andPlot_Cfa_MF$p_isevent
 p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
@@ -431,7 +431,7 @@ plot(p_merge)
 - Cfa-ENF (1 site)
 ```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
 #CN-Qia-->successful
-df_andPlot_Cfa_ENF<-sep_data_indiffY_sepMismatch(ddf0.05,"Cfa","ENF","CN-Qia",c(2003:2006))
+df_andPlot_Cfa_ENF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfa","ENF","CN-Qia",c(2003:2006))
 length(df_andPlot_Cfa_ENF$p_isevent)
 p_diffYears<-df_andPlot_Cfa_ENF$p_isevent
 p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
@@ -439,77 +439,30 @@ p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
 plot(p_merge)
 ```
 
-**(2) For Cfb: for DBF and ENF**
-- Cfb-DBF (1 site)
-```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
-#FR-Fon-->successful
-df_andPlot_Cfb_DBF<-sep_data_indiffY_sepMismatch(ddf0.05,"Cfb","DBF","FR-Fon",c(2006:2013))
-length(df_andPlot_Cfb_DBF$p_isevent)
-p_diffYears<-df_andPlot_Cfb_DBF$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-plot(p_merge)
+**(2) For Cfb: for DBF,MF and ENF (14 sites-->used 12 sites at the end)**
+```{r}
+my_data_Cfb<-my_data[my_data$koeppen_code=="Cfb",]
 ```
-
-- Cfb-ENF (1 site)
+- Cfb-DBF (4 sites)
 ```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
-#FR-LBr
-df_andPlot_Cfb_ENF<-sep_data_indiffY_sepMismatch(ddf0.05,"Cfb","ENF","FR-LBr",c(2001,2004:2008))
-length(df_andPlot_Cfb_ENF$p_isevent)
-p_diffYears<-df_andPlot_Cfb_ENF$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-plot(p_merge)
-```
-**(3) For Dfa: for DBF **
-- Dfa-DBF (1 site)
-```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
-#US-MMS-->successful
-df_andPlot_Dfa_DBF<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfa","DBF","US-MMS",c(2000:2014))
-length(df_andPlot_Dfa_DBF$p_isevent)
-p_diffYears<-df_andPlot_Dfa_DBF$p_isevent
+#DE-Hai-->successful
+site_name<-"DE-Hai"
+df_andPlot_Cfb_DBF1<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","DBF",site_name,c(2000:2012))
+length(df_andPlot_Cfb_DBF1$p_isevent)
+p_diffYears<-df_andPlot_Cfb_DBF1$p_isevent
 p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
           p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
           p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
-          p_diffYears[[13]],p_diffYears[[14]],p_diffYears[[15]],        
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-plot(p_merge)
-```
-**(3) For Dfb: for GRA, DBF, MF and ENF **
-- Dfb-GRA (2 sites)
-```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
-#CH-Fru-->successful
-df_andPlot_Dfb_GRA1<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfb","DBF","CH-Fru",c(2006:2014))
-length(df_andPlot_Dfb_GRA1$p_isevent)
-p_diffYears<-df_andPlot_Dfb_GRA1$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[13]],
           labels = "auto",ncol=3,label_size = 12,align = "hv")
 plot(p_merge)
 
-#IT-MBo:
-df_andPlot_Dfb_GRA2<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfb","GRA","IT-MBo",c(2003:2013))
-length(df_andPlot_Dfb_GRA2$p_isevent)
-p_diffYears<-df_andPlot_Dfb_GRA2$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
-          p_diffYears[[10]],p_diffYears[[11]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-plot(p_merge)
-```
-
-- Dfb-DBF (3 sites)
-```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
 #DK-Sor-->successful
-df_andPlot_Dfb_DBF1<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfb","DBF","DK-Sor",c(2000:2003,2005:2013))
-length(df_andPlot_Dfb_DBF1$p_isevent)
-p_diffYears<-df_andPlot_Dfb_DBF1$p_isevent
+site_name<-"DK-Sor"
+df_andPlot_Cfb_DBF2<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","DBF",site_name,c(2000:2003,2005:2013))
+length(df_andPlot_Cfb_DBF2$p_isevent)
+p_diffYears<-df_andPlot_Cfb_DBF2$p_isevent
 p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
           p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
@@ -518,136 +471,50 @@ p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
           labels = "auto",ncol=3,label_size = 12,align = "hv")
 plot(p_merge)
 
-#IT-Col-->successful
-df_andPlot_Dfb_DBF2<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfb","DBF","IT-Col",c(2001,2005,2007:2011,2013:2014))
-length(df_andPlot_Dfb_DBF2$p_isevent)
-p_diffYears<-df_andPlot_Dfb_DBF2$p_isevent
+#FR-Fon-->successful
+site_name<-"FR-Fon"
+df_andPlot_Cfb_DBF3<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","DBF",site_name,c(2006:2013))
+length(df_andPlot_Cfb_DBF3$p_isevent)
+p_diffYears<-df_andPlot_Cfb_DBF3$p_isevent
 p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],      
+          p_diffYears[[7]],p_diffYears[[8]],
           labels = "auto",ncol=3,label_size = 12,align = "hv")
 plot(p_merge)
 
-#US-Ha1-->successful
-df_andPlot_Dfb_DBF3<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfb","DBF","US-Ha1",c(2000:2012))
-length(df_andPlot_Dfb_DBF3$p_isevent)
-p_diffYears<-df_andPlot_Dfb_DBF3$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
-          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
-          p_diffYears[[13]],
+#IT-Isp
+site_name<-"IT-Isp"
+df<-ddf %>%
+  dplyr::filter(sitename==site_name)
+df_andPlot_Cfb_DBF4<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","DBF",site_name,c(2013:2014))
+length(df_andPlot_Cfb_DBF4$p_isevent)
+p_diffYears<-df_andPlot_Cfb_DBF4$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],
           labels = "auto",ncol=3,label_size = 12,align = "hv")
 plot(p_merge)
 ```
-- Dfb-MF (1 sites)
+- Cfb-MF (3 sites-->2 sites used at the end)
 ```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
-#US-PFa-->successful
-df_andPlot_Dfb_MF<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfb","MF","US-PFa",c(2000:2004,2006:2014))
-length(df_andPlot_Dfb_MF$p_isevent)
-p_diffYears<-df_andPlot_Dfb_MF$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
-          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
-          p_diffYears[[13]],p_diffYears[[14]],        
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-print(p_merge)
-```
-- Dfb-ENF (3 sites)
-```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
-#CZ-BK1-->successful
-df_andPlot_Dfb_ENF1<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfb","ENF","CZ-BK1",c(2004:2008))
-length(df_andPlot_Dfb_ENF1$p_isevent)
-p_diffYears<-df_andPlot_Dfb_ENF1$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-print(p_merge)
+#BE-Bra --> there are no gpp_obs data-->hence not use this site
+site_name<-"BE-Bra"
+# df<-ddf %>%
+#   dplyr::filter(sitename==site_name)
+# df_andPlot_Cfb_MF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","MF",site_name,c(1996:2014))
+# length(df_andPlot_Cfb_MF$p_isevent)
+# p_diffYears<-df_andPlot_Cfb_MF$p_isevent
+# p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+#           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+#           p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+#           p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
+#           p_diffYears[[13]],p_diffYears[[14]],p_diffYears[[15]],
+#           labels = "auto",ncol=3,label_size = 12,align = "hv")
+# plot(p_merge)
 
-#IT-Lav-->successful
-df_andPlot_Dfb_ENF2<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfb","ENF","IT-Lav",c(2003:2014))
-length(df_andPlot_Dfb_ENF2$p_isevent)
-p_diffYears<-df_andPlot_Dfb_ENF2$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
-          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],        
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-print(p_merge)
-
-#RU-Fyo-->successful
-df_andPlot_Dfb_ENF3<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfb","ENF","RU-Fyo",c(2000:2001,2003:2014))
-length(df_andPlot_Dfb_ENF3$p_isevent)
-p_diffYears<-df_andPlot_Dfb_ENF3$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
-          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
-          p_diffYears[[13]],p_diffYears[[14]],        
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-print(p_merge)
-```
-
-**(4) For Dfc:both for GRA and ENF sites**
-
-- Dfc-GRA (1 site)
-
-```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
-#AT-Neu-->successful
-df_andPlot_Dfc_GRA<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfc","GRA","AT-Neu",c(2002:2012))
-length(df_andPlot_Dfc_GRA$p_isevent)
-p_diffYears<-df_andPlot_Dfc_GRA$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]], 
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
-          p_diffYears[[10]],p_diffYears[[11]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-plot(p_merge)
-```
-
-- Dfc-ENF (6 sites)
-```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
-#CA-NS1-->successful
-df_andPlot_Dfc_ENF1<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfc","ENF","CA-NS1",c(2003:2005))
-length(df_andPlot_Dfc_ENF1$p_isevent)
-p_diffYears<-df_andPlot_Dfc_ENF1$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-plot(p_merge)
-
-#CA-NS3-->succesful
-df_andPlot_Dfc_ENF2<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfc","ENF","CA-NS3",c(2002:2005))
-length(df_andPlot_Dfc_ENF2$p_isevent)
-p_diffYears<-df_andPlot_Dfc_ENF2$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-print(p_merge)
-
-#DE-Lkb
-df_andPlot_Dfc_ENF3<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfc","ENF","DE-Lkb",c(2010:2013))
-length(df_andPlot_Dfc_ENF3$p_isevent)
-p_diffYears<-df_andPlot_Dfc_ENF3$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-print(p_merge)
-
-#US-GLE-->successful
-df_andPlot_Dfc_ENF4<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfc","ENF","US-GLE",c(2006:2014))
-length(df_andPlot_Dfc_ENF4$p_isevent)
-p_diffYears<-df_andPlot_Dfc_ENF4$p_isevent
-p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
-          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
-          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
-          labels = "auto",ncol=3,label_size = 12,align = "hv")
-print(p_merge)
-
-#US-NR1-->successful
-df_andPlot_Dfc_ENF5<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfc","ENF","US-NR1",c(2000:2014))
-length(df_andPlot_Dfc_ENF5$p_isevent)
-p_diffYears<-df_andPlot_Dfc_ENF5$p_isevent
+#BE-Vie
+site_name<-"BE-Vie"
+df_andPlot_Cfb_MF1<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","MF",site_name,c(2000:2014))
+length(df_andPlot_Cfb_MF1$p_isevent)
+p_diffYears<-df_andPlot_Cfb_MF1$p_isevent
 p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
           p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
@@ -656,48 +523,504 @@ p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
           labels = "auto",ncol=3,label_size = 12,align = "hv")
 plot(p_merge)
 
-#US-Prr-->succesful
-df_andPlot_Dfc_ENF6<-sep_data_indiffY_sepMismatch(ddf0.05,"Dfc","ENF","US-Prr",c(2010:2012))
+#CH-Lae
+site_name<-"CH-Lae"
+df_andPlot_Cfb_MF2<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","MF",site_name,c(2005:2014))
+length(df_andPlot_Cfb_MF2$p_isevent)
+p_diffYears<-df_andPlot_Cfb_MF2$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+```
+- Cfb-ENF (7 sites-->6 sites used at the end)
+```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
+#DE-Lkb
+site_name<-"DE-Lkb"
+df_andPlot_Cfb_ENF1<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","ENF",site_name,c(2010:2013))
+length(df_andPlot_Cfb_ENF1$p_isevent)
+p_diffYears<-df_andPlot_Cfb_ENF1$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#DE-Obe
+site_name<-"DE-Obe"
+df_andPlot_Cfb_ENF2<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","ENF",site_name,c(2008:2014))
+length(df_andPlot_Cfb_ENF2$p_isevent)
+p_diffYears<-df_andPlot_Cfb_ENF2$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#DE-Tha
+site_name<-"DE-Tha"
+df_andPlot_Cfb_ENF3<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","ENF",site_name,c(2000:2014))
+length(df_andPlot_Cfb_ENF3$p_isevent)
+p_diffYears<-df_andPlot_Cfb_ENF3$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
+          p_diffYears[[13]],p_diffYears[[14]],p_diffYears[[15]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#FR-LBr
+site_name<-"FR-LBr"
+df_andPlot_Cfb_ENF4<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","ENF",site_name,c(2001,2004:2008))
+length(df_andPlot_Cfb_ENF4$p_isevent)
+p_diffYears<-df_andPlot_Cfb_ENF4$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#IT-La2 -->only have one complete year, hence do not use
+site_name<-"IT-La2"
+# df<-ddf %>%
+#   dplyr::filter(sitename==site_name)
+# df_andPlot_Cfb_ENF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","ENF",site_name,c(2001,2004:2008))
+# length(df_andPlot_Cfb_ENF$p_isevent)
+# p_diffYears<-df_andPlot_Cfb_ENF$p_isevent
+# p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+#           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+#           labels = "auto",ncol=3,label_size = 12,align = "hv")
+# plot(p_merge)
+
+#IT-Lav-->successful
+site_name<-"IT-Lav"
+df_andPlot_Cfb_ENF5<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","ENF",site_name,c(2003:2014))
+length(df_andPlot_Cfb_ENF5$p_isevent)
+p_diffYears<-df_andPlot_Cfb_ENF5$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],        
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#NL-Loo
+site_name<-"NL-Loo"
+df_andPlot_Cfb_ENF6<-sep_data_indiffY_sepMismatch(ddf,0.05,"Cfb","ENF",site_name,c(2000:2013))
+length(df_andPlot_Cfb_ENF6$p_isevent)
+p_diffYears<-df_andPlot_Cfb_ENF6$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
+          p_diffYears[[13]],p_diffYears[[14]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+```
+
+**(3) For Cfc: 0 sites**
+```{r}
+my_data_Cfc<-my_data[my_data$koeppen_code=="Cfc",]
+```
+
+**(4) For Dfa: 0 sites **
+```{r}
+my_data_Dfa<-my_data[my_data$koeppen_code=="Dfa",]
+```
+
+**(5) For Dfb: for DBF, MF and ENF (14 sites-->used 10 sites in the end) **
+```{r}
+my_data_Dfb<-my_data[my_data$koeppen_code=="Dfb",]
+```
+- Dfb-DBF (6 site-->used 5 sites in the end)
+```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
+#JP-MBF
+site_name<-"JP-MBF"
+df<-ddf %>%
+  dplyr::filter(sitename==site_name)
+df_andPlot_Dfb_DBF1<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","DBF",site_name,c(2004:2005))
+length(df_andPlot_Dfb_DBF1$p_isevent)
+p_diffYears<-df_andPlot_Dfb_DBF1$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#US-UMB
+site_name<-"US-UMB"
+df_andPlot_Dfb_DBF2<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","DBF",site_name,c(2000:2014))
+length(df_andPlot_Dfb_DBF2$p_isevent)
+p_diffYears<-df_andPlot_Dfb_DBF2$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
+          p_diffYears[[13]],p_diffYears[[14]],p_diffYears[[15]],        
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#US-UMd
+site_name<-"US-UMd"
+df_andPlot_Dfb_DBF3<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","DBF",site_name,c(2008:2014))
+length(df_andPlot_Dfb_DBF3$p_isevent)
+p_diffYears<-df_andPlot_Dfb_DBF3$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],      
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#US-Ha1-->successful
+site_name<-"US-Ha1"
+df_andPlot_Dfb_DBF4<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","DBF",site_name,c(2000:2012))
+length(df_andPlot_Dfb_DBF4$p_isevent)
+p_diffYears<-df_andPlot_Dfb_DBF4$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
+          p_diffYears[[13]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#US-Wcr
+site_name<-"US-WCr"
+df_andPlot_Dfb_DBF5<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","DBF",site_name,c(2000:2006,2011:2014))
+length(df_andPlot_Dfb_DBF5$p_isevent)
+p_diffYears<-df_andPlot_Dfb_DBF5$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#US-Wi3-->lack early spring observation
+site_name<-"US-Wi3"
+df<-ddf %>%
+  dplyr::filter(sitename==site_name)
+# df_andPlot<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","DBF","US-WCr",c(2002,2004))
+# length(df_andPlot$p_agg)
+# p_diffYears<-df_andPlot$p_agg
+# p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],
+#           labels = "auto",ncol=3,label_size = 12,align = "hv")
+# plot(p_merge)
+
+```
+- Dfb-MF (2 sites-->used 2 sites)
+```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
+#US-PFa-->successful
+site_name<-"US-PFa"
+df_andPlot_Dfb_MF1<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","MF",site_name,c(2000:2004,2006:2014))
+length(df_andPlot_Dfb_MF1$p_isevent)
+p_diffYears<-df_andPlot_Dfb_MF1$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
+          p_diffYears[[13]],p_diffYears[[14]],        
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#US-Syv
+site_name<-"US-Syv"
+df_andPlot_Dfb_MF2<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","MF",site_name,c(2002:2006,2014))
+length(df_andPlot_Dfb_MF2$p_isevent)
+p_diffYears<-df_andPlot_Dfb_MF2$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+```
+- Dfb-ENF (6 sites-->used 3 sites in the end)
+```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
+
+#CZ-BK1-->successful
+site_name<-"CZ-BK1"
+df_andPlot_Dfb_ENF1<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","ENF",site_name,c(2004:2008))
+length(df_andPlot_Dfb_ENF1$p_isevent)
+p_diffYears<-df_andPlot_Dfb_ENF1$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#RU-Fyo-->successful
+site_name<-"RU-Fyo"
+df_andPlot_Dfb_ENF2<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfb","ENF",site_name,c(2000:2001,2003:2014))
+length(df_andPlot_Dfb_ENF2$p_isevent)
+p_diffYears<-df_andPlot_Dfb_ENF2$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
+          p_diffYears[[13]],p_diffYears[[14]],        
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#US-GLE-->successful
+site_name<-"US-GLE"
+df_andPlot_Dfb_ENF3<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2006:2014))
+length(df_andPlot_Dfb_ENF3$p_isevent)
+p_diffYears<-df_andPlot_Dfb_ENF3$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#US-Wi0-->do not use as one year and lack spring data
+site_name<-"US-Wi0"
+# df<-ddf %>%
+#   dplyr::filter(sitename==site_name)
+# df_andPlot_Dfc_ENF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2006:2014))
+# length(df_andPlot_Dfc_ENF$p_isevent)
+# p_diffYears<-df_andPlot_Dfc_ENF$p_isevent
+# p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+#           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+#           p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+#           labels = "auto",ncol=3,label_size = 12,align = "hv")
+# print(p_merge)
+
+#US-Wi4-->do not use as lack spring data
+site_name<-"US-Wi4"
+# df<-ddf %>%
+#   dplyr::filter(sitename==site_name)
+# df_andPlot_Dfc_ENF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2002:2005))
+# length(df_andPlot_Dfc_ENF$p_isevent)
+# p_diffYears<-df_andPlot_Dfc_ENF$p_isevent
+# p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+#           p_diffYears[[4]],
+#           labels = "auto",ncol=3,label_size = 12,align = "hv")
+# print(p_merge)
+
+#US-Wi9-->do not use as lack spring data
+site_name<-"US-Wi9"
+# df<-ddf %>%
+#   dplyr::filter(sitename==site_name)
+# df_andPlot_Dfc_ENF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2004:2005))
+# length(df_andPlot_Dfc_ENF$p_isevent)
+# p_diffYears<-df_andPlot_Dfc_ENF$p_isevent
+# p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+#           p_diffYears[[4]],
+#           labels = "auto",ncol=3,label_size = 12,align = "hv")
+# print(p_merge)
+```
+
+**(6) For Dfc:for ENF sites (14 sites--> used 12 sites at the end)**
+```{r}
+my_data_Dfc<-my_data[my_data$koeppen_code=="Dfc",]
+```
+- Dfc-ENF (14 sites-->at the end used 12 sites)
+```{r echo = FALSE, message = FALSE, warning = FALSE,fig.height=10,fig.width=10}
+#CA-Man
+site_name<-"CA-Man"
+df_andPlot_Dfc_ENF1<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2000:2003,2007:2008))
+length(df_andPlot_Dfc_ENF1$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF1$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#CA-NS1-->successful
+site_name<-"CA-NS1"
+df_andPlot_Dfc_ENF2<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2003:2005))
+length(df_andPlot_Dfc_ENF2$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF2$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#CA-NS2-->selected the years with early spring
+site_name<-"CA-NS2"
+df<-ddf %>%
+  dplyr::filter(sitename==site_name)
+df_andPlot_Dfc_ENF3<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2002:2004))
+length(df_andPlot_Dfc_ENF3$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF3$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#CA-NS3-->succesful
+site_name<-"CA-NS3"
+df_andPlot_Dfc_ENF4<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2002:2005))
+length(df_andPlot_Dfc_ENF4$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF4$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#CA-NS4
+site_name<-"CA-NS4"
+df<-ddf %>%
+  dplyr::filter(sitename==site_name)
+df_andPlot_Dfc_ENF5<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2003,2005))
+length(df_andPlot_Dfc_ENF5$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF5$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#CA-NS5
+site_name<-"CA-NS5"
+df<-ddf %>%
+  dplyr::filter(sitename==site_name)
+df_andPlot_Dfc_ENF6<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2002:2005))
 length(df_andPlot_Dfc_ENF6$p_isevent)
 p_diffYears<-df_andPlot_Dfc_ENF6$p_isevent
 p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#CA-Qfo
+site_name<-"CA-Qfo"
+df_andPlot_Dfc_ENF7<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2004:2010))
+length(df_andPlot_Dfc_ENF7$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF7$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#CA-SF1-->do not use as no early Spring data 
+site_name<-"CA-SF1"
+# df<-ddf %>%
+#   dplyr::filter(sitename==site_name)
+# df_andPlot_Dfc_ENF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2004:2006))
+# length(df_andPlot_Dfc_ENF$p_isevent)
+# p_diffYears<-df_andPlot_Dfc_ENF$p_isevent
+# p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+#           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+#           p_diffYears[[7]],
+#           labels = "auto",ncol=3,label_size = 12,align = "hv")
+# plot(p_merge)
+
+#CA-SF2-->do not use as no early Spring data
+site_name<-"CA-SF2"
+# df<-ddf %>%
+#   dplyr::filter(sitename==site_name)
+# df_andPlot_Dfc_ENF<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2004:2006))
+# length(df_andPlot_Dfc_ENF$p_isevent)
+# p_diffYears<-df_andPlot_Dfc_ENF$p_isevent
+# p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+#           p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+#           p_diffYears[[7]],
+#           labels = "auto",ncol=3,label_size = 12,align = "hv")
+# plot(p_merge)
+
+#FI-Hyy
+site_name<-"FI-Hyy"
+df_andPlot_Dfc_ENF8<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2000:2014))
+length(df_andPlot_Dfc_ENF8$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF8$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
+          p_diffYears[[13]],p_diffYears[[14]],p_diffYears[[15]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+##IT-Ren
+site_name<-"IT-Ren"
+df_andPlot_Dfc_ENF9<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2002:2003,2005:2013))
+length(df_andPlot_Dfc_ENF9$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF9$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#US-GBT
+site_name<-"US-GBT"
+df<-ddf %>%
+  dplyr::filter(sitename==site_name)
+df_andPlot_Dfc_ENF10<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2002:2003))
+length(df_andPlot_Dfc_ENF10$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF10$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+print(p_merge)
+
+#US-NR1-->successful
+site_name<-"US-NR1"
+df_andPlot_Dfc_ENF11<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF",site_name,c(2000:2014))
+length(df_andPlot_Dfc_ENF11$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF11$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],p_diffYears[[3]],
+          p_diffYears[[4]],p_diffYears[[5]],p_diffYears[[6]],
+          p_diffYears[[7]],p_diffYears[[8]],p_diffYears[[9]],
+          p_diffYears[[10]],p_diffYears[[11]],p_diffYears[[12]],
+          p_diffYears[[13]],p_diffYears[[14]],p_diffYears[[15]],
+          labels = "auto",ncol=3,label_size = 12,align = "hv")
+plot(p_merge)
+
+#US-Prr-->select the early Spring data
+site_name<-"US-Prr"
+df_andPlot_Dfc_ENF12<-sep_data_indiffY_sepMismatch(ddf,0.05,"Dfc","ENF","US-Prr",c(2011:2012))
+length(df_andPlot_Dfc_ENF12$p_isevent)
+p_diffYears<-df_andPlot_Dfc_ENF12$p_isevent
+p_merge<-plot_grid(p_diffYears[[1]],p_diffYears[[2]],
           labels = "auto",ncol=3,label_size = 12,align = "hv")
 plot(p_merge)
 
 ```
 
-##working to here-->08-26
+**(7) For Dfd:for ENF sites(0 sites)**
+```{r}
+my_data_Dfd<-my_data[my_data$koeppen_code=="Dfd",]
+```
+
+##updates: 11-19
 ## step3: save the data that label with "is_event"
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 #put the results together
 #do not add Dfb_DBF4
-df_all<-list(df_andPlot_Cfa_MF,df_andPlot_Cfa_ENF,
-    df_andPlot_Cfb_DBF,df_andPlot_Cfb_ENF,
-    df_andPlot_Dfa_DBF,
-    df_andPlot_Dfb_GRA1,df_andPlot_Dfb_GRA2,
+df_all<-list(df_andPlot_Cfa_DBF1,df_andPlot_Cfa_DBF2,df_andPlot_Cfa_DBF3,
+             df_andPlot_Cfa_MF,df_andPlot_Cfa_ENF,  #5
+    df_andPlot_Cfb_DBF1,df_andPlot_Cfb_DBF2,df_andPlot_Cfb_DBF3,df_andPlot_Cfb_DBF4,
+    df_andPlot_Cfb_MF1,df_andPlot_Cfb_MF2,
+    df_andPlot_Cfb_ENF1,df_andPlot_Cfb_ENF2,df_andPlot_Cfb_ENF3,
+    df_andPlot_Cfb_ENF4,df_andPlot_Cfb_ENF5,df_andPlot_Cfb_ENF6, #17
     df_andPlot_Dfb_DBF1,df_andPlot_Dfb_DBF2,df_andPlot_Dfb_DBF3,
-    df_andPlot_Dfb_MF,
-    df_andPlot_Dfb_ENF1,df_andPlot_Dfb_ENF2,df_andPlot_Dfb_ENF3,
-    df_andPlot_Dfc_GRA,
-    df_andPlot_Dfc_ENF1,df_andPlot_Dfc_ENF2,df_andPlot_Dfc_ENF3,df_andPlot_Dfc_ENF4,df_andPlot_Dfc_ENF5,df_andPlot_Dfc_ENF6)
+    df_andPlot_Dfb_DBF4,df_andPlot_Dfb_DBF5,
+    df_andPlot_Dfb_MF1,df_andPlot_Dfb_MF2,
+    df_andPlot_Dfb_ENF1,df_andPlot_Dfb_ENF2,df_andPlot_Dfb_ENF3,#27
+    df_andPlot_Dfc_ENF1,df_andPlot_Dfc_ENF2,df_andPlot_Dfc_ENF3,
+    df_andPlot_Dfc_ENF4,df_andPlot_Dfc_ENF5,df_andPlot_Dfc_ENF6,
+    df_andPlot_Dfc_ENF7,df_andPlot_Dfc_ENF8,df_andPlot_Dfc_ENF9,
+    df_andPlot_Dfc_ENF10,df_andPlot_Dfc_ENF11,df_andPlot_Dfc_ENF12 #39
+    )
 
-names(df_all)<-c("JP-SMF","CN-Qia",
-                 "FR-Fon","FR-LBr",
-                 "US-MMS",
-                 "CH-Fru","IT-MBo",
-                 "DK-Sor","IT-Cor","US-Ha1",
-                 "US-Ha1",
-                 "CZ-BK1","IT-Lav","RU-Fyo",
-                 "AT-Neu",
-                 "CA-NS1","CA-NS3","DE-Lkb","US-GLE","US-NR1","US-Prr")
+names(df_all)<-c("IT-Cor","IT-PT1","US-MMS",
+                 "JP-SMF","CN-Qia", #5
+                 "DE-Hai","DK-Sor","FR-Fon","IT-Isp",
+                 "BE-Vie","CH-Lae",
+                 "DE-Lkb","DE-Obe","DE-Tha",
+                 "FR-LBr","IT-Lav","NL-Loo", #17
+                 "JP-MBF","US-UMB","US-UMd",
+                 "US-Ha1","US-WCr",
+                 "US-PFa","US-Syv",
+                 "CZ-Bk1","RU-Fyo","US-GLE",#27
+                 "CA-Man","CA-NS1","US-NS2", 
+                 "CA-NS3","CA-NS4","CA-NS5",
+                 "CA-Qfo","FI-Hyy","IT-Ren",
+                 "US-GBT","US-NR1","US-Prr")#39
 ddf_labeled<-c()
 for(i in 1:length(df_all)){
   ddf_labeled<-rbind(ddf_labeled,df_all[[i]]$df_agg)
 }
 #save the data:
-save.path<-"D:/CES/Data_for_use/Data_sent_by_Beni/"
-save(ddf_labeled,file=paste0(save.path,"ddf_labeled_norm_trs_newmethod_all_overestimation_beyondsites.RDA"))
-save(df_all,file=paste0(save.path,"df_all_results/df_all_norm_trs_newmethod_all_overestimation_beyondsites.RDA"))
+save.path<-"D:/data/photocold_project/Merge_Data/Using_sites_in_Fluxnet2015/"
+save(ddf_labeled,file=paste0(save.path,"ddf_labeled_norm_trs_newmethod_all_overestimation_Fluxnet2015_sites.RDA"))
+save(df_all,file=paste0(save.path,"df_all_results/df_all_norm_trs_newmethod_all_overestimation_Fluxnet2015_sites.RDA"))
 
 ```
 

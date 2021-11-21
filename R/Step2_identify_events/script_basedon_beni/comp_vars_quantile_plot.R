@@ -416,7 +416,7 @@ p_GRVI_len5_b60<-plot_2groups(df_len5_nonnorm,"GRVI","",do_norm = FALSE,FALSE)
 #-------------------------------------------------------------------------
 #(6) save the plot
 #-------------------------------------------------------------------------
-save.path<-"D:/plots/photocold_project/quantile_plot/"
+save.path<-"D:/plots/photocold_project/YP_usingsites_in_Fluxnet/quantile_plot/"
 #merge plots
 #--------------
 #I.GPP and LUE

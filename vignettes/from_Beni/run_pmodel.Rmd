@@ -7,6 +7,12 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+# install.packages("remotes")  #-->need to run when installing rbeni
+# remotes::install_github("cj-holmes/vhs") #-->need to run when installing rbeni
+suppressWarnings(devtools::load_all("D:/Github/ingestr/"))
+suppressWarnings(devtools::load_all("D:/Github/rsofun/"))
+devtools::load_all("D:/Github/rbeni/")
+
 library(ingestr)
 library(tidyverse)
 library(rsofun)
@@ -17,7 +23,8 @@ library(rbeni)
 
 Get site info data
 ```{r}
-df_sites_modis_era <- read_rds("data/df_sites_modis_era.csv")
+dir="D:/Github/photocold/"
+df_sites_modis_era <- read_rds(paste0(dir,"data/df_sites_modis_era.csv"))
 ```
 
 ## Target data
@@ -47,12 +54,15 @@ if (!file.exists(filn)){
 } else {
   ddf_fluxnet_gpp <- read_rds(filn)
 }
+
+#add by YP:
+ddf_fluxnet_gpp <- read_rds(paste0("D:/Github/photocold/data/",filn))
 ```
 
 ## Forcing data
 
 ```{r}
-p_model_fluxnet_drivers <- read_rds("data/p_model_fluxnet_drivers.rds")
+p_model_fluxnet_drivers <- read_rds(paste0("D:/Github/photocold/data/","p_model_fluxnet_drivers.rds"))
 ```
 
 ## Calibrate
