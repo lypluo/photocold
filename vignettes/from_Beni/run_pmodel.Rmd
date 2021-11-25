@@ -29,31 +29,31 @@ df_sites_modis_era <- read_rds(paste0(dir,"data/df_sites_modis_era.csv"))
 
 ## Target data
 
-Use the [ingestr](https://github.com/stineb/ingestr) package once again, now for collecting calibration target data. I.e., GPP based on the nighttime flux decomposition method.
+Use the [ingestr](https://github.com/stineb/ingestr) package once again, now for collecting calibration target data. i.e., GPP based on the nighttime flux decomposition method.
 ```{r warning=FALSE, message=FALSE}
 settings_ingestr_fluxnet <- list(
-  dir_hh = "~/data/FLUXNET-2015_Tier1/20191024/HH/", 
+  dir_hh = "~/data/FLUXNET-2015_Tier1/20191024/HH/",
   getswc = FALSE,
   filter_ntdt = TRUE,
   threshold_GPP = 0.8,
   remove_neg = FALSE
   )
 
-filn <- "ddf_fluxnet_gpp.rds"
-if (!file.exists(filn)){
-  ddf_fluxnet_gpp <- ingestr::ingest(
-    siteinfo = df_sites_modis_era,
-    source    = "fluxnet",
-    getvars = list(gpp = "GPP_NT_VUT_REF",
-                   gpp_unc = "GPP_NT_VUT_SE"),
-    dir = "~/data/FLUXNET-2015_Tier1/20191024/DD/",
-    settings = settings_ingestr_fluxnet,
-    timescale = "d"
-    )
-  saveRDS(ddf_fluxnet_gpp, file = filn)
-} else {
-  ddf_fluxnet_gpp <- read_rds(filn)
-}
+# filn <- "ddf_fluxnet_gpp.rds"
+# if (!file.exists(filn)){
+#   ddf_fluxnet_gpp <- ingestr::ingest(
+#     siteinfo = df_sites_modis_era,
+#     source    = "fluxnet",
+#     getvars = list(gpp = "GPP_NT_VUT_REF",
+#                    gpp_unc = "GPP_NT_VUT_SE"),
+#     dir = "~/data/FLUXNET-2015_Tier1/20191024/DD/",
+#     settings = settings_ingestr_fluxnet,
+#     timescale = "d"
+#     )
+#   saveRDS(ddf_fluxnet_gpp, file = filn)
+# } else {
+#   ddf_fluxnet_gpp <- read_rds(filn)
+# }
 
 #add by YP:
 ddf_fluxnet_gpp <- read_rds(paste0("D:/Github/photocold/data/",filn))
@@ -72,6 +72,7 @@ settings <- list(
   method      = "bayesiantools",
   targetvars  = c("gpp"),
   timescale   = list(targets_obs = "d"),
+  sitenames   = 
   metric      = cost_rmse_fullstack,
   dir_results = "./",
   name        = "mlflx",

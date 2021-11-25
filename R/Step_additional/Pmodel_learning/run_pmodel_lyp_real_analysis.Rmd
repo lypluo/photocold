@@ -1,0 +1,345 @@
+---
+title: "P-model usage"
+author: "Koen Hufkens-->changed by YP"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %/VignetteIndexEntry{P-model usage}
+  %/VignetteEngine{knitr::rmarkdown}
+  %/VignetteEncoding{UTF-8}
+---
+
+YP revised based on the Beni and Koen's code files:
+Beni's: https://github.com/stineb/photocold/blob/master/vignettes/run_pmodel.Rmd
+Koen's demo code file: https://github.com/computationales/rsofun/blob/master/vignettes/pmodel_use.Rmd 
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+devtools::load_all("D:/Github/ingestr/")
+devtools::load_all("D:/Github/rsofun/")
+library(rsofun)
+library(dplyr)
+library(ggplot2)
+
+pars <- list(par = c(
+    kphio           = 0.04607080,
+    soilm_par_a     = 2.75687824,
+    soilm_par_b     = 1.68140444,
+    tau_acclim_tempstress = 7.35259044,
+    par_shape_tempstress  = 0.09863961
+  ))
+```
+
+## using EC sites(from Fluxnet 2015) using for analysis 
+These are real data from the fluxnet sites. We can use these data to run the model, together with observations of GPP we can also parameterize `pmodel` parameters.
+
+```{r}
+library(rsofun)
+library(readr)
+#----------------
+#prepared data by Beni
+#----------------
+#Beni prepare the EC gpp data(tidy from fluxnet) and p model drivers for p_model running analysis, load them:
+#gpp data from EC
+ddf_fluxnet_gpp <- read_rds(paste0("D:/Github/photocold/data/","ddf_fluxnet_gpp.rds"))
+#p model drivers 
+p_model_fluxnet_drivers <- read_rds(paste0("D:/Github/photocold/data/","p_model_fluxnet_drivers.rds"))
+#----------------
+#data filtering
+#----------------
+#only selecting the sites that have complete early spring (based on the analysis from:
+#D:\Github\photocold\analysis\Using_sites_in_Fluxnet2015)--> at least have one complete early spring and summer peak
+sel_sites.path<-"D:/data/photocold_project/event_length/Using_sites_in_Fluxnet2015/"
+load(paste0(sel_sites.path,"df_events_length.RDA"))
+sel_sites_info<-df_events_all
+sel_sites<-unique(df_events_all$sitename)
+#hence only used the data from sel_sites:
+df_fluxnet_gpp_sel<-ddf_fluxnet_gpp %>%
+   filter(sitename %in% sel_sites)
+p_model_fluxnet_drivers_sel<-p_model_fluxnet_drivers %>%
+  filter(sitename %in% sel_sites)
+```
+
+## Running the model--initial model running
+With all data prepared we can run the model using `runread_pmodel_f()`. This function takes the nested data structure and runs the model site by site, returning nested model output results matching the input drivers.
+
+```{r}
+# optimized parameters from previous work-->first used this for running all the selected sites
+params_modl <- list(
+    kphio           = 0.09423773,
+    soilm_par_a     = 0.33349283,
+    soilm_par_b     = 1.45602286,
+    tau_acclim_tempstress = 10,
+    par_shape_tempstress  = 0.0
+)
+
+#run the model using these parameters
+output<-c()
+#
+output<- rsofun::runread_pmodel_f(
+p_model_fluxnet_drivers_sel,
+par = params_modl
+)
+```
+
+### plotting output for initial model running
+##
+We can now visualize both the model output and the measured values together.
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# the main model output-->for each site
+for (i in 1:nrow(output)){
+  sitename_run<-output$sitename[i]
+  model_data <- output %>%
+    filter(sitename==sitename_run)%>%
+  tidyr::unnest(data)
+
+  validation_data <- df_fluxnet_gpp_sel %>%
+  filter(sitename==sitename_run)%>%
+  tidyr::unnest(data)
+display_date<-model_data$date[1]+90  #start from the first date + 90 days
+p_gpp<-ggplot() +
+    geom_line(data = model_data,
+    aes(date,gpp,col="modeled gpp")) +
+    geom_line(data = validation_data,
+    aes(date,gpp,col="EC gpp")) +
+    scale_color_manual("",values = c("modeled gpp"="tomato",
+    "EC gpp"="cyan2"))+
+    labs(x = "Date",y = "GPP(unit)")+
+    annotate(geom = "text",x=display_date,y=20,label=sitename_run)
+print(p_gpp)
+}
+
+```
+
+## Calibrating model parameters and updating the modelling gpp-->for multiple sites
+
+To optimize new parameters based upon driver data and a validation dataset we must first specify an optimization strategy and settings, as well as parameter ranges.
+
+```{r}
+#(1) specify the optimization strategy:
+  settings <- list(
+    method              = "bayesiantools",
+    targetvars          = c("gpp"),
+    timescale           = list(targets_obs = "d"),
+    sitenames           = sitename_run,
+    metric              = cost_rmse_photocold,
+    dir_results         = "./",
+    name                = "FULL",  #!ask Koen if this corresponds to the Beni et al., 2020
+    control = list(
+      sampler = "DEzs",
+      settings = list(
+        burnin = 1000,
+        iterations = 5000
+      )
+    ),
+    par = list(
+      kphio = list(lower=0.04, upper=0.1, init = 0.05),
+      soilm_par_a = list(lower=0, upper=5, init = 3.5),
+      soilm_par_b = list(lower=1, upper=5, init=3.5),
+      tau_acclim_tempstress = list(lower=0, upper=15, init=1),
+      par_shape_tempstress = list(lower=0, upper=0.1, init=0)
+      ) #parameter variation range
+  )
+# By default `rsofun` supports both optimization using the `GenSA` and `BayesianTools` packages. The above statement provides settings for a `BayesianTools` approach using the DEza sampler. For this example the burnin and iterations are kept artificially low. In a real scenario you will have to increase these values orders of magnitude. Keep in mind that optimization routines rely on a cost function, which, depending on its structure influences parameter selection. A limited set of cost functions is provided all starting with `cost_*` but the model structure is transparent and custom cost functions can be easily written.
+# 
+# In addition starting values and ranges are provided for the free parameters in the model. Free parameters include, kphio, a, b, tau and shape. Be mindful that with newer version of rsofun additional parameters might be introduced, so re-check vignettes and model descriptions when updating existing code.
+# 
+# With all settings defined the optimization function `calib_sofun()` can be called with driver data and observations specified.
+
+
+#(2) Calibrating the paramters 
+#for each site--> not used for this study
+# pars_calib_allsites<-c()
+# for (i in 1:nrow(output)){
+# sitename_run<-p_model_fluxnet_drivers_sel$sitename[i]
+# #calibrate the model and optimize free parameters
+# pars_calib <- suppressWarnings(
+#   calib_sofun(
+#     drivers = p_model_fluxnet_drivers_sel[i,],
+#     obs = df_fluxnet_gpp_sel[i,],
+#     settings = settings
+#   )
+# )
+# pars_calib_unlist<-unlist(pars_calib$par)
+# #create tibble files-->successfully at the end Nov-22,2021
+# pars_temp<-tibble(sitename=sitename_run,pars=list(as_tibble(t(as.data.frame(pars_calib_unlist)))))
+# pars_calib_allsites<-rbind(pars_calib_allsites,pars_temp)
+# }
+#save the calibrated parameters:
+# save.path<-"D:/data/photocold_project/p_model_results/calibrated_parameters/"
+# save(pars_calib_allsites,file=paste0(save.path,"pars_calib.RDA"))
+
+#get a set of parameter by using data from all the sites
+pars <- suppressWarnings(
+  calib_sofun(
+    drivers = p_model_fluxnet_drivers_sel,
+    obs = df_fluxnet_gpp_sel,
+    settings = settings
+  )
+)
+
+#(3)Run the model again with calibrated parametes
+# reformatting the parameter list
+new_params_modl <- list(
+    kphio           = pars$par[1],
+    soilm_par_a     = pars$par[2],
+    soilm_par_b     = pars$par[3],
+    tau_acclim_tempstress = pars$par[4],
+    par_shape_tempstress  = pars$par[5])
+# run the model for these parameters
+#add by YP:here needs to always pay attention that: the arguments names in the r function should always correspond to the datasets
+output_new <- rsofun::runread_pmodel_f(
+  p_model_fluxnet_drivers_sel,
+  par = new_params_modl)
+
+#(4)prepare the data(model and EC based gpp) and make the plots
+library(cowplot)
+library(grid)
+for (i in 1:length(output$site_info)){
+  sitename_run<-output$sitename[i]
+  model_drivers <- p_model_fluxnet_drivers_sel %>%
+    filter(sitename==sitename_run)
+  
+  model_data_uncal<- output %>%
+    filter(sitename==sitename_run)%>%
+  tidyr::unnest(data)
+  
+  validation_data <- df_fluxnet_gpp_sel %>%
+  filter(sitename==sitename_run)%>%
+  tidyr::unnest(data)
+
+  model_data_cal<- output_new %>%
+    filter(sitename == sitename_run) %>%
+    tidyr::unnest(data)
+
+#plotting
+display_date<-model_data_uncal$date[1]+90  #start from the first date + 90 days
+p_gpp_FULL<-ggplot() +
+    geom_point(data = validation_data,
+    aes(date,gpp,col="EC gpp")) +
+    geom_line(data = model_data_uncal,
+    aes(date,gpp,col="uncalibrated modeled gpp")) +
+    geom_line(data = model_data_cal,
+    aes(date,gpp,col="calibrated modeled gpp"))+
+    scale_color_manual("",values = c("uncalibrated modeled gpp"="tomato",
+    "calibrated modeled gpp" ="red4",
+    "EC gpp"="cyan2"))+
+    labs(x = "Date",y = "GPP(unit)")+
+    theme_classic()+
+    annotate(geom = "text",x=display_date,y=20,label=sitename_run)
+suppressWarnings(print(p_gpp_FULL))
+}
+```
+For details on the optimization settings we refer to the manuals of [GenSA](https://cran.r-project.org/web/packages/GenSA/index.html) and [BayesianTools](https://github.com/florianhartig/BayesianTools).
+
+## Evaluate model
+
+### Overall
+
+```{r}
+devtools::load_all("D:/Github/rbeni/")
+library(rbeni) #-->make the evaluation plot
+library(cowplot)
+library(grid) 
+#(1) tidy the data:
+#for the uncalibrated model and gpp_obs
+df_modobs1 <- df_fluxnet_gpp_sel %>% 
+  unnest(data) %>% 
+  left_join(
+    output %>% 
+      unnest(data) %>% 
+      dplyr::select(sitename, date, pmodel_uncal = gpp),
+    by = c("sitename", "date")
+  )
+#for the calibrated model and gpp_obs
+df_modobs2 <- df_fluxnet_gpp_sel %>% 
+  unnest(data) %>% 
+  left_join(
+    output_new %>% 
+      unnest(data) %>% 
+      dplyr::select(sitename, date, pmodel_cal = gpp),
+    by = c("sitename", "date")
+  )
+
+#(2)make the evaluation plot
+final.output1<-df_modobs1 %>% 
+  analyse_modobs2("pmodel_uncal", "gpp", type = "hex")
+
+final.output2<-df_modobs2 %>%
+  analyse_modobs2("pmodel_cal","gpp",type = "hex")
+#merge two plots
+evaulation_merge_plot<-plot_grid(final.output1$gg,final.output2$gg,
+                                 labels = "auto",ncol =2,label_size = 12,align = "hv")
+plot(evaulation_merge_plot)
+```
+### Seasonality
+
+#### By climate
+```{r}
+#load the modis data-->tidy from Beni
+df_sites_modis_era <- read_rds(paste0("D:/Github/photocold/","data/df_sites_modis_era.csv"))
+#now take the df_modobs1(original model) as the example
+df_season_climate <- df_modobs1 %>% 
+  mutate(doy = lubridate::yday(date)) %>% 
+  group_by(sitename, doy) %>% 
+  summarise(obs = mean(gpp, na.rm = TRUE), 
+            mod = mean(pmodel_uncal, na.rm = TRUE)) %>% 
+  left_join(
+    df_sites_modis_era,
+    by = "sitename"
+  ) %>%
+  mutate(northsouth = ifelse(lat>0, "North", "South")) %>% 
+  dplyr::filter(koeppen_code != "-") %>%
+  mutate(kg_code_northsouth = paste(koeppen_code, northsouth)) %>% 
+  group_by(kg_code_northsouth, doy) %>% 
+  summarise(obs = mean(obs, na.rm = TRUE), mod = mean(mod, na.rm = TRUE))
+
+#plotting:
+#Seasonal course by climate zone:
+df_season_climate %>% 
+  pivot_longer(c(obs, mod), names_to = "Source", values_to = "gpp") %>% 
+  ggplot(aes(doy, gpp, color = Source)) +
+  geom_line() +
+  scale_color_manual(values = c("mod" = "red", "obs" = "black"), labels = c("P-model", "obs.")) +
+  labs(y = expression( paste("GPP (g C m"^-2, " d"^-1, ")" ) ),
+       x = "Day of year") +
+  facet_wrap(~kg_code_northsouth)
+
+# ggsave("../fig/meanseasonalcycle_by_climate.pdf", width = 9, height = 6)
+```
+
+#### By site
+```{r}
+#same as by the climate
+df_season_site <- df_modobs1 %>% 
+  mutate(doy = lubridate::yday(date)) %>% 
+  group_by(sitename, doy) %>% 
+  summarise(obs = mean(gpp, na.rm = TRUE), 
+            mod = mean(pmodel_uncal, na.rm = TRUE)) %>% 
+  group_by(sitename, doy) %>% 
+  summarise(obs = mean(obs, na.rm = TRUE), mod = mean(mod, na.rm = TRUE))
+
+#plotting:
+#Seasonal course by climate zone:
+df_season_site %>% 
+  pivot_longer(c(obs, mod), names_to = "Source", values_to = "gpp") %>% 
+  ggplot(aes(doy, gpp, color = Source)) +
+  geom_line() +
+  scale_color_manual(values = c("mod" = "red", "obs" = "black"), labels = c("P-model", "obs.")) +
+  labs(y = expression( paste("GPP (g C m"^-2, " d"^-1, ")" ) ),
+       x = "Day of year") +
+  facet_wrap(~sitename)
+
+# ggsave("../fig/meanseasonalcycle_by_site.pdf", width = 15, height = 30)
+
+```
+

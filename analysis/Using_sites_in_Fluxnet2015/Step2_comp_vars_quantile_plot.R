@@ -158,12 +158,12 @@ fun.path<-"D:/Github/photocold/R/Step2_identify_events/Functions/functions_from_
 source(paste0(fun.path,"Difference_test_for_2Classes.R"))
 
 plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
-    # df<-df_len5_nonnorm
-    # comp_var<-"temp_min_fluxnet2015"
-    # var_unit<-"()"
-    # do_norm<-FALSE
-    # do_legend<-FALSE
-    
+    df<-df_len5_nonnorm
+    comp_var<-"temp_day_fluxnet2015"
+    var_unit<-"()"
+    do_norm<-FALSE
+    do_legend<-FALSE
+
     #
     df.event<-df$df_dday
     df.noevent<-df$df_noevent_dday
