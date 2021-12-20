@@ -76,7 +76,11 @@ get_consecutive <- function( dry, leng_threshold=5, anom=NULL, do_merge=FALSE,me
       # while (ninst < ninst_save){
         
       # ninst_save <- nrow( instances )
-        
+      
+      if(nrow(instances)==1){
+        instances<-instances
+      }
+      if(nrow(instances)>1){
         instances_merged <- data.frame( idx_start=c(), len=c() )
         
         idx <- 0
@@ -102,6 +106,10 @@ get_consecutive <- function( dry, leng_threshold=5, anom=NULL, do_merge=FALSE,me
         instances <- instances_merged
         rownames(instances)<-c(1:nrow(instances))
         ninst <- nrow( instances )
+        
+      }
+        
+        
         
         print( "dimensions of instances after merging short periods" )
         print( dim( instances ) )

@@ -45,7 +45,9 @@ library(readr)
 #----------------
 #Beni prepare the EC gpp data(tidy from fluxnet) and p model drivers for p_model running analysis, load them:
 #gpp data from EC
-ddf_fluxnet_gpp <- read_rds(paste0("D:/Github/photocold/data/","ddf_fluxnet_gpp.rds"))
+# ddf_fluxnet_gpp <- read_rds(paste0("D:/Github/photocold/data/","ddf_fluxnet_gpp.rds"))
+ddf_fluxnet_gpp <- read_rds("data/ddf_fluxnet_gpp.rds")
+
 #p model drivers 
 p_model_fluxnet_drivers <- read_rds(paste0("D:/Github/photocold/data/","p_model_fluxnet_drivers.rds"))
 #----------------

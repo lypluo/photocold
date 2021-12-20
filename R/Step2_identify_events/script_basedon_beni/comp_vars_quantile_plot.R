@@ -222,10 +222,10 @@ plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
     #x axis range
     # x_range_event<-range(df.event_sel$doy)
     # x_range_nonevent<-range(df.nonevent_sel$doy)
-    ###start to make the quantiile plot:
+    ###start to make the quantile plot:
     df.event_sel$flag<-rep("GPP overestimated sites",nrow(df.event_sel))
     df.nonevent_sel$flag<-rep("GPP non-overestimated sites",nrow(df.nonevent_sel))
-    #!one thing need to pay attention-->use q90 to limit the dday range in sites as the sites diff a lot
+    #!one thing need to pay attention-->use q75 to limit the dday range in sites as the sites diff a lot
     #to ensure the results do not impact by one specific site
     dday_range_event<-ddply(df.event_sel,.(sitename),summarize,min_dday=min(dday),max_dday=max(dday))
     dday_range_nonevent<-ddply(df.nonevent_sel,.(sitename),summarize,min_dday=min(dday),max_dday=max(dday))
@@ -238,7 +238,13 @@ plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
     df.all<-rbind(df.event_sel,df.nonevent_sel)
     df.all$flag<-factor(df.all$flag,levels = c("GPP overestimated sites","GPP non-overestimated sites"))
       
-    #merge the different sites in "event" and "non-event" sites->calculate the quantiles at the same time
+    #merge the different sites in "event" and "non-event" sites->calculate the quantiles at the same time:
+    #for min temperature-->first find the mininum temperature for each site then calculate the quantile
+    # if(comp_var=="temp_min_fluxnet2015"){
+    #   df.all<-df.all %>%
+    #     group_by(sitename,dday,flag) %>%
+    #     summarise(comp_var=min(comp_var))
+    # }
     df.all_q<-ddply(df.all,.(flag,dday),summarize,q10=quantile(comp_var,0.10,na.rm = T),q25=quantile(comp_var,0.25,na.rm = T),
           q50=quantile(comp_var,0.5,na.rm = T),q75=quantile(comp_var,0.75,na.rm = T),q90=quantile(comp_var,0.9,na.rm = T))
     #-----------------------
@@ -313,7 +319,16 @@ plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
     
     return(out)
   }
-
+# a small test for Tmin, comparing 1)first calculate the Tmin across differnt years-->then calculate the percentile by using the Tmin from different sites
+#2)calculate the percentile by using the Tmin from different years and different sites directly
+#for 1)
+p_temp_min_len5_b60_1<-plot_2groups(df_len5_nonnorm,"temp_min_fluxnet2015","(degreeC)",do_norm = FALSE,do_legend = TRUE)
+#for 2) -->by commenting the code line 241-247
+p_temp_min_len5_b60_2<-plot_2groups(df_len5_nonnorm,"temp_min_fluxnet2015","(degreeC)",do_norm = FALSE,do_legend = FALSE)
+#merge two:
+plot_grid(p_temp_min_len5_b60_1$plot,
+          p_temp_min_len5_b60_2$plot,
+          labels = "auto",ncol=2,label_size = 18,align = "hv")
 #-------------------------------------------------------------------------
 #(5) officially to compare the vars in two different group ("event" and "non_event")
 #-------------------------------------------------------------------------
@@ -368,13 +383,13 @@ p_SWC_1_len5_b60<-plot_2groups(df_len5_nonnorm,"SWC_1_fluxnet2015","(%)",do_norm
 
 #some modifying in the plot:
 p_temp_min_len5_b60$plot<-p_temp_min_len5_b60$plot+
-  ylab("Minimum Ta (°C)")+
+  ylab("Minimum Ta (?C)")+
   ylim(-25,25)
 p_temp_day_len5_b60$plot<-p_temp_day_len5_b60$plot+
-  ylab("Mean Ta (°C)")+
+  ylab("Mean Ta (?C)")+
   ylim(-25,25)
 p_temp_max_len5_b60$plot<-p_temp_max_len5_b60$plot+
-  ylab("Maximum Ta (°C)")+
+  ylab("Maximum Ta (?C)")+
   ylim(-25,25)
 p_prec_len5_b60$plot<-p_prec_len5_b60$plot+
   ylab("prec (mm)")
@@ -383,9 +398,9 @@ p_vpd_day_len5_b60$plot<-p_vpd_day_len5_b60$plot+
 p_SW_IN_len5_b60$plot<-p_SW_IN_len5_b60$plot+
   ylab("SW_IN (W m-2)")
 p_TS_1_len5_b60$plot<-p_TS_1_len5_b60$plot+
-  ylab("TS (°C)")
+  ylab("TS (?C)")
 p_SWC_1_len5_b60$plot<-p_SWC_1_len5_b60$plot+
-  ylab("SWC (°C)")
+  ylab("SWC (?C)")
 #--------------
 #III.PhenoCam VIs
 #-------------
@@ -408,7 +423,7 @@ p_GRVI_len5_b60<-plot_2groups(df_len5_nonnorm,"GRVI","",do_norm = FALSE,FALSE)
 #plot2-->simplifying the plot
 # p_temp_min_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_min_fluxnet2015","(degreeC)",do_norm = FALSE,do_legend = TRUE)
 # p_temp_min_len5_b60$plot<-p_temp_min_len5_b60$plot+
-#   ylab("Minimum Ta (°C)")+
+#   ylab("Minimum Ta (?C)")+
 #   ylim(-15,15)
 # save.path<-"D:/CES/Proposal_prepration/MSCA/plots_prepration/plot/"
 # ggsave(paste0(save.path,"Ta_min.png"),p_temp_min_len5_b60$plot,width = 10,height = 10)

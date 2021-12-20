@@ -148,9 +148,7 @@ for(i in 1:nrow(df_sites_sel)){
 df_all$VPD_F<-df_all$VPD_F*100
 df_all$VPD_F_MDS<-df_all$VPD_F_MDS*100
 #
-df_all$VPD_F<-df_all_others$VPD_F*100
-df_all$VPD_F_MDS<-df_all_others$VPD_F_MDS*100
-#the sites according Beni' datasets
+#the sites according Beni' datasets-->from Fluxnet2015
 save.path<-"D:/data/photocold_project/FLUXNET_data/Using_sites_in_Fluxnet2015/"
 #for the other available sites in FLUXNET2015:
 save(df_all,file=paste0(save.path,"HH_data.RDA"))
@@ -162,14 +160,15 @@ library(plyr)
 #----------------
 #c1.summary half-hourly to daily data for each site
 #----------------
-#I.for the sites accoring to the data sent by Beni:
+#I.for the sites accoring to the Fluxnet2015 tidy by Beni:
 #first to select the variables interested:
 sel_variables<-c("sitename","TIMESTAMP_START","TA_F","SW_IN_F",
-                 "PA_F","P_F","WS_F","PPFD_IN","PPFD_OUT","VPD_F",
+                 "PA_F","P_F","WS_F","PPFD_IN","PPFD_OUT","VPD_F",  
                  "NEE_VUT_REF",
                  "GPP_NT_VUT_REF","GPP_DT_VUT_REF",
-                 paste0("TS_F_MDS_",c(1:9)),paste0("SWC_F_MDS_",c(1:5)))
+                 paste0("TS_F_MDS_",c(1:7)),paste0("SWC_F_MDS_",c(1:7))) #from the datasets-->most layer of SWC =7, and TS=7
 df_all_sel<-df_all[,sel_variables]
+##Working here!
 #merge to daily
 df_all_sel$Date<-format(df_all_sel$TIMESTAMP_START,format = "%Y-%m-%d")
 df_all_sel$HH<-hour(df_all_sel$TIMESTAMP_START)
@@ -188,59 +187,21 @@ df_all_sel_daily<-ddply(df_all_sel,.(sitename,Date),summarise,
   TS_1_mean=mean(TS_F_MDS_1,na.rm = T),TS_2_mean=mean(TS_F_MDS_2,na.rm = T),
   TS_3_mean=mean(TS_F_MDS_3,na.rm = T),TS_4_mean=mean(TS_F_MDS_4,na.rm = T),
   TS_5_mean=mean(TS_F_MDS_5,na.rm = T),TS_6_mean=mean(TS_F_MDS_6,na.rm = T),
-  TS_7_mean=mean(TS_F_MDS_7,na.rm = T),TS_8_mean=mean(TS_F_MDS_8,na.rm = T),TS_9_mean=mean(TS_F_MDS_9,na.rm = T),
+  TS_7_mean=mean(TS_F_MDS_7,na.rm = T),
   SWC_1_mean=mean(SWC_F_MDS_1,na.rm = T),SWC_2_mean=mean(SWC_F_MDS_2,na.rm = T),
-  SWC_3_mean=mean(SWC_F_MDS_3,na.rm = T),SWC_4_mean=mean(SWC_F_MDS_4,na.rm = T),SWC_5_mean=mean(SWC_F_MDS_5,na.rm = T)
+  SWC_3_mean=mean(SWC_F_MDS_3,na.rm = T),SWC_4_mean=mean(SWC_F_MDS_4,na.rm = T),
+  SWC_5_mean=mean(SWC_F_MDS_5,na.rm = T),SWC_6_mean=mean(SWC_F_MDS_6,na.rm = T),
+  SWC_7_mean=mean(SWC_F_MDS_7,na.rm = T)
 )
 #checke the non NAs in each variable
 apply(df_all_sel_daily[,-c(1:2)],2,function(x){sum(!is.na(x))})
-
-#II.for the other available sites from Fluxnet2015
-#first to select the variables interested:
-sel_variables<-c("sitename","TIMESTAMP_START","TA_F","SW_IN_F",
-                 "PA_F","P_F","WS_F","PPFD_IN","PPFD_OUT","VPD_F",
-                 "NEE_VUT_REF",
-                 "GPP_NT_VUT_REF","GPP_DT_VUT_REF",
-                 paste0("TS_F_MDS_",c(1:9)),paste0("SWC_F_MDS_",c(1:7)))
-df_all_others_sel<-df_all_others[,sel_variables]
-#merge to daily
-df_all_others_sel$Date<-format(df_all_others_sel$TIMESTAMP_START,format = "%Y-%m-%d")
-#summarize the data to daily 
-#for VPD,only using the data in the day time (HH>=6 <=18)-->set the VPD value == NA for non-day 
-df_all_others_sel[df_all_others_sel$HH<6 | df_all_others_sel$HH>18,]$VPD_F<-NA
-df_all_others_sel_daily<-ddply(df_all_others_sel,.(sitename,Date),summarise,
-                        Ta_mean=mean(TA_F,na.rm = T),TA_min=min(TA_F,na.rm = T),TA_max=max(TA_F,na.rm = T),
-                        SW_IN_mean=mean(SW_IN_F,na.rm = T),PA_mean=mean(PA_F,na.rm = T),P=sum(P_F,na.rm = T),
-                        WS_mean=mean(WS_F,na.rm = T),
-                        PPFD_IN_mean=mean(PPFD_IN,na.rm = T),PPFD_OUT_mean=mean(PPFD_OUT,na.rm = T),
-                        VPD_day_mean=mean(VPD_F,na.rm=T),
-                        NEE_mean=mean(NEE_VUT_REF,na.rm=T),
-                        GPP_NT_mean=mean(GPP_NT_VUT_REF,na.rm = T),GPP_DT_mean=mean(GPP_DT_VUT_REF,na.rm = T),
-                        TS_1_mean=mean(TS_F_MDS_1,na.rm = T),TS_2_mean=mean(TS_F_MDS_2,na.rm = T),
-                        TS_3_mean=mean(TS_F_MDS_3,na.rm = T),TS_4_mean=mean(TS_F_MDS_4,na.rm = T),
-                        TS_5_mean=mean(TS_F_MDS_5,na.rm = T),TS_6_mean=mean(TS_F_MDS_6,na.rm = T),
-                        TS_7_mean=mean(TS_F_MDS_7,na.rm = T),TS_8_mean=mean(TS_F_MDS_8,na.rm = T),TS_9_mean=mean(TS_F_MDS_9,na.rm = T),
-                        SWC_1_mean=mean(SWC_F_MDS_1,na.rm = T),SWC_2_mean=mean(SWC_F_MDS_2,na.rm = T),
-                        SWC_3_mean=mean(SWC_F_MDS_3,na.rm = T),SWC_4_mean=mean(SWC_F_MDS_4,na.rm = T),
-                        SWC_5_mean=mean(SWC_F_MDS_5,na.rm = T),SWC_6_mean=mean(SWC_F_MDS_6,na.rm = T),
-                        SWC_5_mean=mean(SWC_F_MDS_7,na.rm = T)
-)
-#checke the non NAs in each variable
-apply(df_all_others_sel_daily[,-c(1:2)],2,function(x){sum(!is.na(x))})
 
 #----------------
 #c2.save the preprocessed daily data
 #----------------
 #I.for the sites accoring to the data sent by Beni:
-save.path<-"D:/CES/Data_for_use/Fluxnet_Data/Preprocessed_data/Preprocessed_data/"
+save.path<-"D:/data/photocold_project/FLUXNET_data/Using_sites_in_Fluxnet2015/"
 save(df_all_sel_daily,file=paste0(save.path,"Daily_data.RDA"))
-#II.for the other available sites from Fluxnet2015
-save(df_all_others_sel_daily,file=paste0(save.path,"Other_sites/Daily_data.RDA"))
-#III.merge all the sites:
-df_all_sel_daily$Date<-ymd(df_all_sel_daily$Date)
-df_all_others_sel_daily$Date<-ymd(df_all_others_sel_daily$Date)
-df_all_daily<-dplyr::bind_rows(df_all_sel_daily,df_all_others_sel_daily)
-save(df_all_daily,file=paste0(save.path,"All_sites/Daily_data.RDA"))
 
 #----------------------------------------------------
 #d.comparing the processed results with provided data by Beni
@@ -250,7 +211,7 @@ save(df_all_daily,file=paste0(save.path,"All_sites/Daily_data.RDA"))
 load.path<-"D:/CES/Data_for_use/Data_sent_by_Beni/"
 df_Beni<-read.csv(file=paste0(load.path,"ddf_fluxnet2015_pmodel_with_forcings_stocker19gmd.csv"))
 #finding the corresponding sites between "df_Beni"and "df_all_sel_daily"
-sel_sites<-intersect(unique(df_all_daily$sitename),unique(df_Beni$sitename))
+sel_sites<-intersect(unique(df_all_sel_daily$sitename),unique(df_Beni$sitename))
 #
 df_Beni_sel<-c()
 for(i in 1:length(sel_sites)){
@@ -291,15 +252,15 @@ compare_vars<-function(df_YP_daily,df_Beni_daily,var_in_YP,var_in_Beni){
 ####
 #before comparing-->convert the unit:
 #convert the unit of GPP from umol m-2 s-1 to gC m-2 d-1
-df_all_daily$GPP_NT_mean<-df_all_daily$GPP_NT_mean*24*3600*12/1000000
-df_all_daily$GPP_DT_mean<-df_all_daily$GPP_DT_mean*24*3600*12/1000000
+df_all_sel_daily$GPP_NT_mean<-df_all_sel_daily$GPP_NT_mean*24*3600*12/1000000
+df_all_sel_daily$GPP_DT_mean<-df_all_sel_daily$GPP_DT_mean*24*3600*12/1000000
 #for GPP
-p_gpp<-compare_vars(df_all_daily,df_Beni_sel,"GPP_NT_mean","gpp_obs")
-p_ppfd<-compare_vars(df_all_daily,df_Beni_sel,"PPFD_IN_mean","ppfd_fluxnet2015")
-p_temp<-compare_vars(df_all_daily,df_Beni_sel,"Ta_mean","temp_day_fluxnet2015")
-p_preci<-compare_vars(df_all_daily,df_Beni_sel,"P","prec_fluxnet2015")
-p_patm<-compare_vars(df_all_daily,df_Beni_sel,"PA_mean","patm_fluxnet2015")
-p_vpd<-compare_vars(df_all_daily,df_Beni_sel,"VPD_day_mean","vpd_day_fluxnet2015")
+p_gpp<-compare_vars(df_all_sel_daily,df_Beni_sel,"GPP_NT_mean","gpp_obs")
+p_ppfd<-compare_vars(df_all_sel_daily,df_Beni_sel,"PPFD_IN_mean","ppfd_fluxnet2015")
+p_temp<-compare_vars(df_all_sel_daily,df_Beni_sel,"Ta_mean","temp_day_fluxnet2015")
+p_preci<-compare_vars(df_all_sel_daily,df_Beni_sel,"P","prec_fluxnet2015")
+p_patm<-compare_vars(df_all_sel_daily,df_Beni_sel,"PA_mean","patm_fluxnet2015")
+p_vpd<-compare_vars(df_all_sel_daily,df_Beni_sel,"VPD_day_mean","vpd_day_fluxnet2015")
 
 library(cowplot)
 p_merge<-plot_grid(p_gpp,p_ppfd,p_temp,p_preci,p_patm,p_vpd,

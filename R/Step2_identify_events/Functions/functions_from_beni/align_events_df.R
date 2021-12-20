@@ -22,15 +22,23 @@
 # source.path<-'C:/Users/yluo/Desktop/R_testcode/PhotoCold/Second_round_of_code/R/Functions/functions_from_beni/'
 # source(file=paste0(source.path,"get_consecutive.R"))
 #
+q33 <- function( vec, ... ){
+  quantile( vec, 0.33, ...)
+}
+
+q66 <- function( vec, ... ){
+  quantile( vec, 0.66, ...)
+}
+
 align_events <- function( df,dovars,leng_threshold, before, after, nbins, do_norm=FALSE ){
   #!comment by YPL:test using some df
   # df<-df_events.years
-  # dovars<-c("gpp_obs")
+  # dovars<-c("gpp")
   # leng_threshold<-5
-  # before=30
+  # before=60
   # after=0
   # nbins=10
-  # do_norm=TRUE
+  # do_norm=FALSE
   
   require(plyr)
   require( dplyr )
@@ -48,9 +56,9 @@ align_events <- function( df,dovars,leng_threshold, before, after, nbins, do_nor
   ##--------------------------------------------------------
   ## Identify events ()
   ##--------------------------------------------------------
-  events <- get_consecutive( 
-    df$is_event, 
-    leng_threshold = leng_threshold, 
+  events <- get_consecutive(
+    df$is_event,
+    leng_threshold = leng_threshold,
     do_merge       = TRUE,
     merge_len = 10
   )
@@ -61,6 +69,32 @@ align_events <- function( df,dovars,leng_threshold, before, after, nbins, do_nor
   ## and columns added for 'dday' (number of day relative to onset of event)
   ## and 'iinst' number of event to which row belongs.
   ##--------------------------------------------------------
+  if(nrow(events)==1){
+    df_dday <- c()
+    
+    after_inst<-events$len 
+    dday <- seq( from=-before, to=after_inst, by=1 )
+    idxs <- dday + events$idx_start
+    #
+    # pos_event<-c(pos_event,idxs)
+    drophead <- which( idxs < 1 )  #comment by YP:keep the data when the idxs>1
+    if (length(drophead)>0){
+      idxs <- idxs[ -drophead ]
+      dday <- dday[ -drophead ]
+    }
+    addrows <- df %>% slice( idxs ) %>% mutate( dday=dday, inst=1 )
+    df_dday <- rbind(df_dday,addrows)  
+    
+    ## Bins for different variables XXX a bit weird with default values
+    #changed by YP for Bins
+    if(after==0){
+      bins  <- seq( from=-before, to=after, by=(after+before)/nbins )
+    }
+    if(after>0){
+      bins<-seq( from=-before, to=max(df_dday$dday), by=c(max(df_dday$dday)+before)/nbins )
+    }
+    
+  }
   if (nrow(events)>1){
     
     df_dday <- c()

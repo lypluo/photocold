@@ -319,10 +319,11 @@ sep_data_indiffY_sepMismatch<-function(ddf,degf,Clim,PFT,site_name,avai_years){
     #b.plotting:demonstration the original value + moving average + dividing lines
     pos_agg<-pos_diffYears[i,]
     pos_overestim<-df_subset$doy[which(df_subset$over_estim=="yes")]
+    pos_isevent<-df_subset$doy[which(df_subset$is_event=="yes")]
     pos_isevent_less10<-df_subset$doy[which(df_subset$is_event_less10=="yes")]
     
     rect.coord_GS=data.frame(x1=df_subset$date[pos_agg[,"sos10"]],x2=df_subset$date[pos_agg[,"eos10"]], y1=min(df_subset$gpp_mod_norm,na.rm = T)-0.05, y2=max(df_subset$gpp_mod_norm,na.rm = T)+0.02)
-    # rect.coord_isevent=data.frame(x1=df_subset$date[min(pos_isevent)],x2=df_subset$date[max(pos_isevent)], y1=min(df_subset$gpp_mod_norm,na.rm = T)-0.05, y2=max(df_subset$gpp_mod_norm,na.rm = T)+0.02)
+    rect.coord_isevent=data.frame(x1=df_subset$date[min(pos_isevent)],x2=df_subset$date[max(pos_isevent)], y1=min(df_subset$gpp_mod_norm,na.rm = T)-0.05, y2=max(df_subset$gpp_mod_norm,na.rm = T)+0.02)
     rect.coord_isevent_less10=data.frame(x1=df_subset$date[min(pos_isevent_less10)],x2=df_subset$date[max(pos_isevent_less10)], y1=min(df_subset$gpp_mod_norm,na.rm = T)-0.05, y2=max(df_subset$gpp_mod_norm,na.rm = T)+0.02)
 #
   
@@ -337,8 +338,8 @@ sep_data_indiffY_sepMismatch<-function(ddf,degf,Clim,PFT,site_name,avai_years){
       labs(title = paste0(Clim,"-",PFT,"-",site_name,":",Years_unique[i]), x = "", y = "norm GPP" )+  #(g C m-2 d-1 )
   geom_rect(data=rect.coord_GS,mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="green3",alpha=0.1)+
   geom_vline(xintercept = df_subset[df_subset$over_estim=="yes",]$date,col=adjustcolor("steelblue2",0.3))+
-  # geom_rect(data=rect.coord_isevent,mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="steelblue2",alpha=0.3)+
-  geom_rect(data=rect.coord_isevent_less10,mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="orange",alpha=0.5)+
+  geom_rect(data=rect.coord_isevent,mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="blue",alpha=0.3)+
+  # geom_rect(data=rect.coord_isevent_less10,mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="orange",alpha=0.5)+
   theme_classic()+
   theme(legend.position = c(0.15,0.9),legend.background = element_blank())
   

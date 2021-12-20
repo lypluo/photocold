@@ -158,11 +158,11 @@ fun.path<-"D:/Github/photocold/R/Step2_identify_events/Functions/functions_from_
 source(paste0(fun.path,"Difference_test_for_2Classes.R"))
 
 plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
-    df<-df_len5_nonnorm
-    comp_var<-"temp_day_fluxnet2015"
-    var_unit<-"()"
-    do_norm<-FALSE
-    do_legend<-FALSE
+    # df<-df_len5_nonnorm
+    # comp_var<-"temp_min_fluxnet2015"
+    # var_unit<-"()"
+    # do_norm<-FALSE
+    # do_legend<-FALSE
 
     #
     df.event<-df$df_dday
@@ -208,7 +208,7 @@ plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
     # grob_event_name <- grobTree(textGrob(df_name, x=0.8,  y=0.1, hjust=0,
     #                                      gp=gpar(col="red", fontsize=18, fontface="italic")))
     grob_nonevent <- grobTree(textGrob("Non-Event site-year", x=0.6,  y=0.9, hjust=0,
-                                       gp=gpar(col="red", fontsize=18, fontface="italic")))
+                                       gp=gpar(col="green4", fontsize=18, fontface="italic")))
     # grob_nonevent_name<-grobTree(textGrob(df_name, x=0.8,  y=0.1, hjust=0,
     #                                       gp=gpar(col="red", fontsize=18, fontface="italic")))
     #y axis range:
@@ -232,7 +232,14 @@ plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
     ##merge and classify 
     df.all<-rbind(df.event_sel,df.nonevent_sel)
     df.all$flag<-factor(df.all$flag,levels = c("GPP overestimated sites","GPP non-overestimated sites"))
-      
+    ##
+    #for min temperature-->first find the mininum temperature for each site then calculate the quantile
+    if(comp_var=="temp_min_fluxnet2015"){
+      df.all<-df.all %>%
+        group_by(sitename,dday,flag) %>%
+        dplyr::summarise(comp_var=min(comp_var,na.rm = T))
+    }
+    
     #merge the different sites in "event" and "non-event" sites->calculate the quantiles at the same time
     df.all_q<-ddply(df.all,.(flag,dday),summarize,q10=quantile(comp_var,0.10,na.rm = T),q25=quantile(comp_var,0.25,na.rm = T),
           q50=quantile(comp_var,0.5,na.rm = T),q75=quantile(comp_var,0.75,na.rm = T),q90=quantile(comp_var,0.9,na.rm = T))
@@ -349,40 +356,40 @@ p_fapar_itpl_len5_b60$plot<-p_fapar_itpl_len5_b60$plot+
 #temp_day
 p_temp_day_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_day_fluxnet2015","(degreeC)",do_norm = FALSE,FALSE)
 #temp_min
-# p_temp_min_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_min_fluxnet2015","(degreeC)",do_norm = FALSE,do_legend = TRUE)
+p_temp_min_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_min_fluxnet2015","(degreeC)",do_norm = FALSE,do_legend = TRUE)
 #temp_max
-# p_temp_max_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_max_fluxnet2015","(degreeC)",do_norm = FALSE,FALSE)
+p_temp_max_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_max_fluxnet2015","(degreeC)",do_norm = FALSE,FALSE)
 #for prec
 p_prec_len5_b60<-plot_2groups(df_len5_nonnorm,"prec_fluxnet2015","(mm)",do_norm = FALSE,do_legend = FALSE)
 #vpd_day
 p_vpd_day_len5_b60<-plot_2groups(df_len5_nonnorm,"vpd_day_fluxnet2015","(Pa)",do_norm = FALSE,do_legend = FALSE)
 #SW_IN
-# p_SW_IN_len5_b60<-plot_2groups(df_len5_nonnorm,"SW_IN_fluxnet2015","(W m-2)",do_norm = FALSE,FALSE)
+p_SW_IN_len5_b60<-plot_2groups(df_len5_nonnorm,"SW_IN_fluxnet2015","(W m-2)",do_norm = FALSE,FALSE)
 #TS_1-->first layer soil temperature
-# p_TS_1_len5_b60<-plot_2groups(df_len5_nonnorm,"TS_1_fluxnet2015","(degreeC)",do_norm = FALSE,FALSE)
+p_TS_1_len5_b60<-plot_2groups(df_len5_nonnorm,"TS_1_fluxnet2015","(degreeC)",do_norm = FALSE,FALSE)
 #SWC_1-->first layer soil mosture
-# p_SWC_1_len5_b60<-plot_2groups(df_len5_nonnorm,"SWC_1_fluxnet2015","(%)",do_norm = FALSE,FALSE)
+p_SWC_1_len5_b60<-plot_2groups(df_len5_nonnorm,"SWC_1_fluxnet2015","(%)",do_norm = FALSE,FALSE)
 
 #some modifying in the plot:
-# p_temp_min_len5_b60$plot<-p_temp_min_len5_b60$plot+
-#   ylab("Minimum Ta (°C)")+
-#   ylim(-25,25)
+p_temp_min_len5_b60$plot<-p_temp_min_len5_b60$plot+
+  ylab("Minimum Ta (ºC)")+
+  ylim(-30,25)
 p_temp_day_len5_b60$plot<-p_temp_day_len5_b60$plot+
-  ylab("Mean Ta (°C)")+
-  ylim(-25,25)
-# p_temp_max_len5_b60$plot<-p_temp_max_len5_b60$plot+
-#   ylab("Maximum Ta (°C)")+
-#   ylim(-25,25)
+  ylab("Mean Ta (ºC)")+
+  ylim(-30,25)
+p_temp_max_len5_b60$plot<-p_temp_max_len5_b60$plot+
+  ylab("Maximum Ta (ºC)")+
+  ylim(-30,25)
 p_prec_len5_b60$plot<-p_prec_len5_b60$plot+
   ylab("prec (mm)")
 p_vpd_day_len5_b60$plot<-p_vpd_day_len5_b60$plot+
   ylab("vpd_day (Pa)")
-# p_SW_IN_len5_b60$plot<-p_SW_IN_len5_b60$plot+
-#   ylab("SW_IN (W m-2)")
-# p_TS_1_len5_b60$plot<-p_TS_1_len5_b60$plot+
-#   ylab("TS (°C)")
-# p_SWC_1_len5_b60$plot<-p_SWC_1_len5_b60$plot+
-#   ylab("SWC (°C)")
+p_SW_IN_len5_b60$plot<-p_SW_IN_len5_b60$plot+
+  ylab("SW_IN (W m-2)")
+p_TS_1_len5_b60$plot<-p_TS_1_len5_b60$plot+
+  ylab("TS (ºC)")
+p_SWC_1_len5_b60$plot<-p_SWC_1_len5_b60$plot+
+  ylab("SWC (%)")
 #--------------
 #III.PhenoCam VIs
 #-------------
@@ -405,7 +412,7 @@ p_GRVI_len5_b60<-plot_2groups(df_len5_nonnorm,"GRVI","",do_norm = FALSE,FALSE)
 #plot2-->simplifying the plot
 # p_temp_min_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_min_fluxnet2015","(degreeC)",do_norm = FALSE,do_legend = TRUE)
 # p_temp_min_len5_b60$plot<-p_temp_min_len5_b60$plot+
-#   ylab("Minimum Ta (°C)")+
+#   ylab("Minimum Ta (?C)")+
 #   ylim(-15,15)
 # save.path<-"D:/CES/Proposal_prepration/MSCA/plots_prepration/plot/"
 # ggsave(paste0(save.path,"Ta_min.png"),p_temp_min_len5_b60$plot,width = 10,height = 10)
@@ -428,19 +435,19 @@ ggsave(paste0(save.path,"p_Cflux.png"),p_merge_Cflux,width = 20,height = 15)
 #--------------
 #II.Environment variables
 #-------------
-# p_merge_EnviroVars<-plot_grid(
-#   p_temp_min_len5_b60$plot,p_temp_day_len5_b60$plot,p_temp_max_len5_b60$plot,
-#   p_SW_IN_len5_b60$plot,
-#   p_prec_len5_b60$plot,
-#   p_vpd_day_len5_b60$plot,
-#   p_SWC_1_len5_b60$plot,
-#   p_TS_1_len5_b60$plot,
-#   labels = "auto",nrow=2,label_size = 18,align = "hv")
 p_merge_EnviroVars<-plot_grid(
-  p_temp_day_len5_b60$plot,
+  p_temp_min_len5_b60$plot,p_temp_day_len5_b60$plot,p_temp_max_len5_b60$plot,
+  p_SW_IN_len5_b60$plot,
   p_prec_len5_b60$plot,
   p_vpd_day_len5_b60$plot,
+  p_SWC_1_len5_b60$plot,
+  p_TS_1_len5_b60$plot,
   labels = "auto",nrow=2,label_size = 18,align = "hv")
+# p_merge_EnviroVars<-plot_grid(
+#   p_temp_day_len5_b60$plot,
+#   p_prec_len5_b60$plot,
+#   p_vpd_day_len5_b60$plot,
+#   labels = "auto",nrow=2,label_size = 18,align = "hv")
 
 ggsave(paste0(save.path,"p_EnviroVars.png"),p_merge_EnviroVars,width = 28,height = 15)
 #--------------

@@ -32,10 +32,11 @@ q66 <- function( vec, ... ){
 
 align_events <- function( df, dovars, leng_threshold, before, after, nbins, do_norm=FALSE ){
   #!comment by YPL:test using some df
-  # df<-df_norm_all
-  # dovars<-"gpp_obs"
-  # leng_threshold<-20
-  # before=30
+  # df<-df_norm_RU_Fyo
+  # dovars<-c("gpp")
+  # df.sep<-df.sep20_RU_Fyo
+  # leng_threshold<-5
+  # before=60
   # after=0
   # nbins=10
   # do_norm=FALSE
@@ -88,7 +89,9 @@ align_events <- function( df, dovars, leng_threshold, before, after, nbins, do_n
         dday <- dday[ -drophead ]
       }
       addrows <- df %>% slice( idxs ) %>% mutate( dday=dday, inst=iinst )
-      df_dday <- df_dday %>% bind_rows( addrows )              
+      df_dday <- df_dday %>% bind_rows(addrows)   #added by YP: still not figure out why this is not right   
+      # df_dday <- rbind(df_dday,addrows) 
+      print(i)
     }
     #added by YP:tidy the non-event data
     pos_nonevent<-setdiff(df$idx_df,pos_event)

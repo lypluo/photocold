@@ -39,7 +39,7 @@ settings_ingestr_fluxnet <- list(
   remove_neg = FALSE
   )
 
-# filn <- "ddf_fluxnet_gpp.rds"
+filn <- "ddf_fluxnet_gpp.rds"
 # if (!file.exists(filn)){
 #   ddf_fluxnet_gpp <- ingestr::ingest(
 #     siteinfo = df_sites_modis_era,
