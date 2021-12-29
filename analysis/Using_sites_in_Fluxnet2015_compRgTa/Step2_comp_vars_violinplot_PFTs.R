@@ -52,6 +52,20 @@ source(paste0(fun.path,"align_events_df.R"))
 #source align_nonevent.R -->for non-event site years
 source(paste0(fun.path,"align_nonevents_df.R"))
 
+#-------------------------------------------------
+#add additional code for PFTs: add PFTs information for each sites-->2021-12-13
+#------------------------------------------------
+#load the modis data for classifying the vegetation types:
+library(tidyverse) #-->function read_rds
+PFT.path<-"D:/Github/photocold/data/"
+df_sites_modis_era <- read_rds(paste0(PFT.path,"df_sites_modis_era.csv"))
+#
+df_norm_all<-df_norm_all%>%
+  left_join(
+    df_sites_modis_era,
+    by = "sitename"
+  )
+
 sep_siteyears_data<-function(df.data,dovars,df.sep,leng_threshold,before,after,nbins,do_norm){
   # df.data<-df_norm_all
   # dovars<-c("gpp_obs")
@@ -145,82 +159,57 @@ for(i in 1:length(df_len5_nonnorm)){
   #assign value back:
   df_len5_nonnorm[[i]]<-df_proc
 }
-
 #-------------------------------------------------------------------------
 #(4)going to compare the "event" and "non-event" site with boxplot
 #-------------------------------------------------------------------------
-#--------------
-#first to classify the "df_dday" and "df_noevent_dday" into different N classes
-#--------------
-library(plyr)  
-library(ggplot2)
-library(cowplot)
-library(grid)
-Classify_Nbins_andPlot<-function(df,class_dday_range,class_var,N,do_manual_class){
+  #-------------------------------------------------------------------------
+  #start plotting
+  #-------------------------------------------------------------------------
+  library(plyr)  
+  library(ggplot2)
+  library(cowplot)
+  library(grid)
+  
+#function used to compare the "event" and "non_event" sites using geom_ribbon 
+#source the comparsion test written by me:
+fun.path<-"D:/Github/photocold/R/Step2_identify_events/Functions/functions_from_YP/"
+source(paste0(fun.path,"Difference_test_for_2Classes.R"))
+
+comp_boxplot<-function(df,comp_vars,var_units,do_legend,end_xylab,PFT_name){
   # df<-df_len5_nonnorm
-  # class_dday_range<-c(-60,70)
-  # class_var<-"temp_min_fluxnet2015"
-  # N<-10
-  # do_manual_class<-TRUE
-  #----------------
-  #do classification:
-  #----------------
+  # comp_vars<-c("temp_min_fluxnet2015","SW_IN_fullday_mean_fluxnet2015")
+  # var_units<-c("(degreeC)","")
+  # do_legend<-FALSE
+  # end_xylab<-c("Minimum Ta (ºC)","SW_IN full-dday mean (W m-2)")
+  # PFT_name<-"ENF"
+  #
   df.event<-df$df_dday
   df.noevent<-df$df_noevent_dday
-  #merge df.event and df.noevent
-  df.event$year_flag<-rep("GPP overestimated sites",nrow(df.event))
-  df.noevent$year_flag<-rep("GPP non-overestimated sites",nrow(df.noevent))
   #
-  df.all<-rbind(df.event,df.noevent)
-  df.all$year_flag<-factor(df.all$year_flag,levels = c("GPP overestimated sites","GPP non-overestimated sites"))
-  #only select the data dday between -60 to 70:
-  df.all<-df.all[df.all$dday>=class_dday_range[1] & df.all$dday<=class_dday_range[2],]
-  
-  # Bins for different variables
-  xmin<-round(min(df.all[,class_var],na.rm = T),1)
-  xmax<-round(max(df.all[,class_var],na.rm = T),1)         
-  bins  <- seq( from=xmin, 
-                to=xmax, by=(xmax-xmin)/N )
-  if(do_manual_class==TRUE){
-    xmin<-c(-40)
-    xmax<-30
-    bins  <- seq( from=xmin, 
-                  to=xmax, by=(xmax-xmin)/N )
-  }
-  
-  #
-  df.all<-df.all %>% mutate(inbin=cut( as.numeric(df.all[,class_var]), breaks = bins ))
-  #
-  return(df.all)
-}
-
-##classify the df with the minimum temperature
-# df_bins<-Classify_Nbins_andPlot(df_len5_nonnorm,c(-60,70),"temp_min_fluxnet2015",10,TRUE)
-
-#-----------------
-#start plotting
-#----------------
-comp_boxplot<-function(df,comp_yvar,do_legend,end_xylab){
-  # df<-df_bins_Ta
-  # comp_yvar<-c("SW_IN_fullday_mean_fluxnet2015")
-  # do_legend<-FALSE
-  # end_xylab<-c("Minium Ta (degreeC)","")
-
+  df.event<-df.event %>% filter(classid==PFT_name)
+  df.noevent<-df.noevent %>% filter(classid==PFT_name)
   #------------------------------------
   #plotting 
   #------------------------------------
+  df.event$flag<-rep("GPP overestimated sites",nrow(df.event))
+  df.noevent$flag<-rep("GPP non-overestimated sites",nrow(df.noevent))
+  df.tidy<-rbind(df.event,df.noevent)
+  df.tidy$flag<-factor(df.tidy$flag,levels = c("GPP overestimated sites","GPP non-overestimated sites"))
+  #only select the data dday between -60 to 70:
+  df.tidy<-df.tidy[df.tidy$dday>=c(-60) & df.tidy$dday<=70,]
   ##
-  df.tidy<-df[,c("sitename","date",comp_yvar,"inbin","year_flag")]
-  names(df.tidy)<-c("sitename","date","comp_vary","inbin","year_flag")
-  #remove the rows when inbin ==NA
-  df.tidy<-df.tidy[!is.na(df.tidy$inbin),]
+  df.tidy<-df.tidy[,c("sitename","date",comp_vars,"flag")]
+  names(df.tidy)<-c("sitename","date","comp_varx","comp_vary","flag")
   ##
-  p_plot_main<-ggplot(df.tidy,aes(x = inbin, y = comp_vary,fill=year_flag))+
-    geom_boxplot()+
+  p_plot_main<-ggplot(df.tidy,aes(x = comp_varx, y = comp_vary,fill=flag))+
     # annotate("rect",xmin=0,xmax=70,ymin = -Inf,ymax = Inf,alpha=0.2)+  #
-    scale_fill_manual("",values = c("GPP overestimated sites"=adjustcolor("tomato",1),
-                    "GPP non-overestimated sites"=adjustcolor("cyan3",1)))+
-    theme(legend.position = c(0.25,0.9),legend.background = element_blank(),
+    geom_violin(trim=TRUE)+
+    # geom_boxplot(width=0.1)
+    # scale_color_manual("",values = c("GPP overestimated sites"="red","GPP non-overestimated sites"="cyan"))+
+    scale_fill_manual("",values = c("GPP overestimated sites"=adjustcolor("tomato",0.3),"GPP non-overestimated sites"=adjustcolor("cyan",0.5)))+
+    xlab(paste0(comp_vars[1]," ",var_units[1]))+
+    ylab(paste0(comp_vars[2]," ",var_units[2]))+
+    theme(legend.position = c(0.15,0.9),legend.background = element_blank(),
           legend.text = element_text(size=20),
           axis.title = element_text(size=20),
           axis.text = element_text(size = 20),
@@ -228,8 +217,57 @@ comp_boxplot<-function(df,comp_yvar,do_legend,end_xylab){
           panel.grid.minor = element_blank())+
     xlab(end_xylab[1])+
     ylab(end_xylab[2])
-  if(comp_yvar=="alpha_SW"|comp_yvar=="alpha_PPFD"){
+    
+  ifelse(comp_vars[2]!="alpha_SW",
+    y_median<-round(median(df.tidy[df.tidy$flag=="GPP overestimated sites",]$comp_vary,na.rm = T),0),
+    y_median<-round(median(df.tidy[df.tidy$flag=="GPP overestimated sites",]$comp_vary,na.rm = T),2))
+
+    p_plot_y<-ggplot(df.tidy,aes(x = flag, y = comp_vary,fill=flag))+
+    geom_boxplot(width=0.2,position = position_dodge(width = 0.1))+
+    geom_hline(yintercept = y_median,lty=2,size=1.1,col="blue")+
+    annotate(geom = "text",x=0.6,y=y_median+y_median*0.5,label=y_median,size=4)+
+    scale_fill_manual("",values = c("GPP overestimated sites"=adjustcolor("tomato",0.3),"GPP non-overestimated sites"=adjustcolor("cyan",0.5)))+
+    theme(legend.position = "none",
+          legend.background = element_blank(),
+          legend.text = element_blank(),
+          axis.title = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text.y = element_text(size = 18),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          # panel.border = element_blank(),
+          rect=element_rect(fill="transparent"))
+ 
+  x_median<-round(median(df.tidy[df.tidy$flag=="GPP overestimated sites",]$comp_varx,na.rm = T),0)
+  p_plot_x<-ggplot(df.tidy,aes(x = flag, y = comp_varx,fill=flag))+
+    geom_boxplot(width=0.2,position = position_dodge(width = 0.1))+
+    geom_hline(yintercept = x_median,lty=2,size=1.1,col="blue")+
+    annotate(geom = "text",x=0.6,y=x_median+3,label=x_median,size=4)+
+    coord_flip()+
+    scale_fill_manual("",values = c("GPP overestimated sites"=adjustcolor("tomato",0.3),"GPP non-overestimated sites"=adjustcolor("cyan",0.5)))+
+    theme(legend.position = "none",
+          legend.background = element_blank(),
+          legend.text = element_blank(),
+          axis.title = element_blank(),
+          axis.text.x = element_text(size = 18),
+          axis.text.y = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          # panel.border = element_blank(),
+          rect=element_rect(fill="transparent"))
+   ##variation range:
+  if(comp_vars[2]!="alpha_SW"){
     p_plot_main<-p_plot_main+
+      xlim(-55,20)+
+      ylim(-300,1000)
+    # xlim(-60,70)  #add x range in 2021-09-25
+  }
+  if(comp_vars[2]=="alpha_SW"){
+    p_plot_main<-p_plot_main+
+      xlim(-55,20)+
+      ylim(-0.4,1)
+    # xlim(-60,70)  #add x range in 2021-09-25
+    p_plot_y<-p_plot_y+
       ylim(0,1)
   }
   #legend
@@ -237,58 +275,73 @@ comp_boxplot<-function(df,comp_yvar,do_legend,end_xylab){
     p_plot_main<-p_plot_main+
       theme(legend.position = "none")
   }
-   #
-  return(p_plot_main)
+  
+  plot.with.insert<-
+    ggdraw()+
+    draw_plot(p_plot_main)+
+    draw_plot(p_plot_y,x=0.08,y=0.5,width =0.2,height = 0.3)+
+    draw_plot(p_plot_x,x=0.4,y=0.1,width =0.3,height = 0.2)
+  #
+  return(plot.with.insert)
 }
-##
-# df<-df_bins
-# comp_yvar<-c("SW_IN_fullday_mean_fluxnet2015")
-# do_legend<-FALSE
-# end_xylab<-c("Minium Ta (degreeC)","SW_IN full-dday mean (W m-2)")
-# comp_boxplot(df_bins,c("SW_IN_fullday_mean_fluxnet2015"),TRUE,c("Minium Ta (degreeC)","SW_IN full-dday mean (W m-2)"))
+
+
 #-------------------------------------------------------------------------
 #(5) officially to compare the vars in two different group ("event" and "non_event")
 #-------------------------------------------------------------------------
 ##mainly compare between the SW and Ta
-#--------------
-#classify based on the tmin(x),and plot others
-#-------------
-#1)classification:
-df_bins_Ta<-Classify_Nbins_andPlot(df_len5_nonnorm,c(-60,70),"temp_min_fluxnet2015",10,TRUE)
+# df<-df_len5_nonnorm
+# comp_vars<-c("temp_min_fluxnet2015","SW_IN_midday_mean_fluxnet2015")
+# var_units<-c("(degreeC)","(W m-2)")
+# do_legend<-FALSE
 
-#2)plotting
+#--------------
+#Environment variables
+#-------------
+merge_plots<-function(df_len5_nonnorm,PFT_name){
+  # df_len5_nonnorm<-df_len5_nonnorm
+  # PFT_name<-"DBF"
+  
 #tmin and SW_midday_mean
-p_tmin_SW_fullday_mean<-comp_boxplot(df_bins_Ta,c("SW_IN_fullday_mean_fluxnet2015"),TRUE,
-                                   c("Minimum Ta (ºC)","SW_IN full-dday mean (W m-2)"))
+p_tmin_SW_fullday_mean<-comp_boxplot(df_len5_nonnorm,c("temp_min_fluxnet2015","SW_IN_fullday_mean_fluxnet2015"),
+                                    c("(degreeC)","(W m-2)"),TRUE,c("Minimum Ta (ºC)","SW_IN full-dday mean (W m-2)"),PFT_name)
 #tmin and SW_midday_mean
-p_tmin_SW_midday_mean<-comp_boxplot(df_bins_Ta,c("SW_IN_midday_mean_fluxnet2015"),FALSE,
-                                    c("Minimum Ta (ºC)","SW_IN middday mean (W m-2)"))
+p_tmin_SW_midday_mean<-comp_boxplot(df_len5_nonnorm,c("temp_min_fluxnet2015","SW_IN_midday_mean_fluxnet2015"),
+             c("(degreeC)","(W m-2)"),FALSE,c("Minimum Ta (ºC)","SW_IN mid-dday mean (W m-2)"),PFT_name)
 #tmin and SW_midday_max
-p_tmin_SW_midday_max<-comp_boxplot(df_bins_Ta,c("SW_IN_midday_max_fluxnet2015"),FALSE,
-                                   c("Minimum Ta (ºC)","SW_IN middday maximum (W m-2)"))
-#tmin and PPFD_IN_midday_mean
-p_tmin_PPFD_midday_mean<-comp_boxplot(df_bins_Ta,c("PPFD_IN_midday_mean_fluxnet2015"),FALSE,
-                                     c("Minimum Ta (ºC)","PPFD_IN mid-dday (max umol m-2 s-1)"))
-#tmin and PPFD_IN_midday_max
-p_tmin_PPFD_midday_max<-comp_boxplot(df_bins_Ta,c("PPFD_IN_midday_max_fluxnet2015"),FALSE,
-                                     c("Minimum Ta (ºC)","PPFD_IN mid-dday max (umol m-2 s-1)"))
+p_tmin_SW_midday_max<-comp_boxplot(df_len5_nonnorm,c("temp_min_fluxnet2015","SW_IN_midday_max_fluxnet2015"),
+                                    c("(degreeC)","(W m-2)"),FALSE,c("Minimum Ta (ºC)","SW_IN mid-dday maximum (W m-2)"),PFT_name)
+#tmean and SW_midday_max
+p_tmean_SW_midday_max<-comp_boxplot(df_len5_nonnorm,c("temp_day_fluxnet2015","SW_IN_midday_max_fluxnet2015"),
+                              c("(degreeC)","(W m-2)"),FALSE,c("mean Ta (ºC)","SW_IN mid-dday mean (W m-2)"),PFT_name)
+#tmin and SW_midday_max
+p_tmin_PPFD_midday_max<-comp_boxplot(df_len5_nonnorm,c("temp_min_fluxnet2015","PPFD_IN_midday_max_fluxnet2015"),
+                                   c("(degreeC)","(umol m-2 s-1)"),FALSE,c("Minimum Ta (ºC)","PPFD_IN mid-dday max (W m-2)"),PFT_name)
 #tmin and alpha_SW
-p_tmin_alpha_SW<-comp_boxplot(df_bins_Ta,c("alpha_SW"),FALSE,c("Minimum Ta (ºC)","alpha_SW"))
-#tmin and alpha_PPFD
-p_tmin_alpha_PPFD<-comp_boxplot(df_bins_Ta,c("alpha_PPFD"),FALSE,c("Minimum Ta (ºC)","alpha_PPFD"))
+p_tmin_alpha_SW<-comp_boxplot(df_len5_nonnorm,c("temp_min_fluxnet2015","alpha_SW"),
+                              c("(degreeC)",""),FALSE,c("Minimum Ta (ºC)","alpha_SW"),PFT_name)
+
+p_merge_EnviroVars<-plot_grid(p_tmin_SW_fullday_mean,
+                              p_tmin_SW_midday_mean,p_tmin_SW_midday_max,p_tmean_SW_midday_max,
+                              p_tmin_PPFD_midday_max,p_tmin_alpha_SW,
+                              labels = "auto",ncol=2,label_size = 18,align = "hv")
+return(p_merge_EnviroVars)
+}
+
 
 #-------------------------------------------------------------------------
-#(6) save the plot
+#save the plot
 #-------------------------------------------------------------------------
-save.path<-"D:/plots/photocold_project/Using_sites_in_Fluxnet2015_compRgTa/boxplot/"
-#merge plots
+save.path<-"D:/plots/photocold_project/Using_sites_in_Fluxnet2015_compRgTa/violin_plot/For_different_PFTs/"
 #--------------
-#I.Merge Ta and other variables
+#II.Environment variables
 #-------------
-p_merge_TaandOther<-plot_grid(p_tmin_SW_fullday_mean,p_tmin_SW_midday_mean,p_tmin_SW_midday_max,
-                              p_tmin_PPFD_midday_mean,p_tmin_PPFD_midday_max,
-                              p_tmin_alpha_SW,
-  labels = "auto",ncol=2,label_size = 18,align = "hv")
+DBF_comp<-merge_plots(df_len5_nonnorm,"DBF")
+ggsave(paste0(save.path,"DBF_comp.png"),DBF_comp,width = 22,height = 22)
 
-ggsave(paste0(save.path,"p_Taandother.png"),p_merge_TaandOther,width = 22,height = 22)
+MF_comp<-merge_plots(df_len5_nonnorm,"MF")
+ggsave(paste0(save.path,"MF_comp.png"),MF_comp,width = 22,height = 22)
+
+ENF_comp<-merge_plots(df_len5_nonnorm,"ENF")
+ggsave(paste0(save.path,"ENF_comp.png"),ENF_comp,width = 22,height = 22)
 
