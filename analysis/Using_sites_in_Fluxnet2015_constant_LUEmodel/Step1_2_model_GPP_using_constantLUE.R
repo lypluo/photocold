@@ -48,7 +48,9 @@ for(i in 1:length(sites)){
   df<-df_final_all %>%
     filter(sitename==sites[i])
   #select the data outside of the green-up period to model the LUE
-  df_out_greenup<-df[df$doy<df$sos|df$doy>df$peak,]
+  #df_out_greenup<-df[df$doy<df$sos|df$doy>df$peak,]
+  # set the doy>peak in order to capture GPP peak using constant LUE
+  df_out_greenup<-df[df$doy>df$peak,]  
   # #using robust regression:-->some error hence change to simple linear regression
   # lm_rob<-lmrob(gpp_obs~APAR - 1,data=df_out_greenup)  #set the intercept =0
   lm_norm<-lm(gpp_obs~APAR - 1,data=df_out_greenup)  #set the intercept =0
@@ -66,6 +68,13 @@ df_final_all<-left_join(df_final_all,LUE_final,by="sitename")
 #compare the GPP_obs with GPP model through conLUE
 #-----------------------------------------------------
 df_final_all$gpp_conLUE<-df_final_all$APAR*df_final_all$conLUE
+##save the data:
+GPP_conLUE<-df_final_all
+#
+GPP_conLUE<-GPP_conLUE[,c("sitename","date","doy","sos","peak","Over_days_length","APAR","gpp_obs","gpp_mod_FULL","gpp_conLUE")]
+# save the constant LUE GPP:
+# save.path<-"D:/data/photocold_project/GPP_from_diffSources/site_scale/"
+# save(GPP_conLUE,file = paste0(save.path,"GPP_conLUE_FLUX2015_daily.RDA"))
 #first have a look at the performance for each site or all sites
 #1) for each site:
 df_final_all %>%

@@ -34,7 +34,12 @@ load.path<-"D:/data/photocold_project/Merge_Data/Using_sites_in_Fluxnet2015/"
 load(paste0(load.path,"ddf_labeled_norm_trs_newmethod_all_overestimation_Fluxnet2015_sites.RDA"))
 df_all_sites<-ddf_labeled;rm(ddf_labeled) 
 df_norm_all<-df_all_sites
-  
+#!additional: also load the MODIS VIs:
+VI.path<-"D:/Github/photocold/data/"
+load(paste0(VI.path,"df_modis_CCI_etal.RDA"))
+#
+df_norm_all<-left_join(df_norm_all,df.VIs_final,by=c("sitename","date"))
+
 #-------------------------------------------------------------------------
 #(2)start to align the data according to Beni's functions of "align_events" and "get_consecutive"
 #-------------------------------------------------------------------------
@@ -391,8 +396,28 @@ p_TS_1_len5_b60$plot<-p_TS_1_len5_b60$plot+
 p_SWC_1_len5_b60$plot<-p_SWC_1_len5_b60$plot+
   ylab("SWC (%)")
 #--------------
-#III.PhenoCam VIs
+#III.VIs (MODIS VIs and PhenoCam VIs)
 #-------------
+###########MODIS##############
+#ndvi
+p_ndvi_len5_b60<-plot_2groups(df_len5_nonnorm,"ndvi","",do_norm = FALSE,TRUE)
+#evi
+p_evi_len5_b60<-plot_2groups(df_len5_nonnorm,"evi","",do_norm = FALSE,FALSE)
+#NIRv
+p_NIRv_len5_b60<-plot_2groups(df_len5_nonnorm,"NIRv","",do_norm = FALSE,FALSE)
+#CCI
+p_cci_len5_b60<-plot_2groups(df_len5_nonnorm,"cci","",do_norm = FALSE,FALSE)
+
+##
+p_ndvi_len5_b60$plot<-p_ndvi_len5_b60$plot+
+  ylab("NDVI")
+p_evi_len5_b60$plot<-p_evi_len5_b60$plot+
+  ylab("EVI")
+p_NIRv_len5_b60$plot<-p_NIRv_len5_b60$plot+
+  ylab("NIRv")
+p_cci_len5_b60$plot<-p_cci_len5_b60$plot+
+  ylab("CCI")
+##########PhenoCam############
 #gcc_90
 p_gcc_90_len5_b60<-plot_2groups(df_len5_nonnorm,"gcc_90","",do_norm = FALSE,TRUE)
 #rcc_90
@@ -451,9 +476,13 @@ p_merge_EnviroVars<-plot_grid(
 
 ggsave(paste0(save.path,"p_EnviroVars.png"),p_merge_EnviroVars,width = 28,height = 15)
 #--------------
-#III.PhenoCam VIs
+#III.MODIS VIs/PhenoCam VIs
 #-------------
-p_merge_VIs<-plot_grid(p_gcc_90_len5_b60$plot,
+p_merge_VIs<-plot_grid(p_ndvi_len5_b60$plot,
+                       p_evi_len5_b60$plot,
+                       p_NIRv_len5_b60$plot,
+                       p_cci_len5_b60$plot,
+                       p_gcc_90_len5_b60$plot,
                        p_rcc_90_len5_b60$plot,
                        p_GRVI_len5_b60$plot,
                        labels = "auto",nrow=2,label_size = 18,align = "hv")

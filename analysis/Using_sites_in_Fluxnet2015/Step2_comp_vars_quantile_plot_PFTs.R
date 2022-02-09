@@ -3,6 +3,7 @@
 #-------------------------------------------------------------------------
 #(1)load the data that includes the "is_event" information
 #-------------------------------------------------------------------------
+rm(list=ls())
 #---------------------
 #A.load the event_length data
 #---------------------
@@ -34,7 +35,12 @@ load.path<-"D:/data/photocold_project/Merge_Data/Using_sites_in_Fluxnet2015/"
 load(paste0(load.path,"ddf_labeled_norm_trs_newmethod_all_overestimation_Fluxnet2015_sites.RDA"))
 df_all_sites<-ddf_labeled;rm(ddf_labeled) 
 df_norm_all<-df_all_sites
-  
+#!additional: also load the MODIS VIs:
+VI.path<-"D:/Github/photocold/data/"
+load(paste0(VI.path,"df_modis_CCI_etal.RDA"))
+#
+df_norm_all<-left_join(df_norm_all,df.VIs_final,by=c("sitename","date"))
+
 #-------------------------------------------------------------------------
 #(2)start to align the data according to Beni's functions of "align_events" and "get_consecutive"
 #-------------------------------------------------------------------------
@@ -361,7 +367,7 @@ plot_2groups_PFT<-function(df,comp_var,var_unit,do_norm,do_legend,PFT_name){
 #update in 2021-12-13: specify for individual PFTs:
 analysis_PFTs<-function(df_len5_nonnorm,PFT_name){
   # df_len5_nonnorm<-df_len5_nonnorm
-  # PFT_name<-"DBF"
+  # PFT_name<-"ENF"
   
   out_all<-c()
   #--------------
@@ -429,12 +435,33 @@ analysis_PFTs<-function(df_len5_nonnorm,PFT_name){
   #III.PhenoCam VIs
   #-------------
   if(length(df_len5_nonnorm$df_dday$gcc_90[!is.na(df_len5_nonnorm$df_dday$gcc_90)])>10){
+    #MDOIS VIs:
+    #ndvi
+    p_ndvi_len5_b60<-plot_2groups_PFT(df_len5_nonnorm,"ndvi","",do_norm = FALSE,TRUE,PFT_name)
+    #evi
+    p_evi_len5_b60<-plot_2groups_PFT(df_len5_nonnorm,"evi","",do_norm = FALSE,FALSE,PFT_name)
+    #NIRv
+    p_NIRv_len5_b60<-plot_2groups_PFT(df_len5_nonnorm,"NIRv","",do_norm = FALSE,FALSE,PFT_name)
+    #CCI
+    p_cci_len5_b60<-plot_2groups_PFT(df_len5_nonnorm,"cci","",do_norm = FALSE,FALSE,PFT_name)
+    ##
+    p_ndvi_len5_b60$plot<-p_ndvi_len5_b60$plot+
+      ylab("NDVI")
+    p_evi_len5_b60$plot<-p_evi_len5_b60$plot+
+      ylab("EVI")
+    p_NIRv_len5_b60$plot<-p_NIRv_len5_b60$plot+
+      ylab("NIRv")
+    p_cci_len5_b60$plot<-p_cci_len5_b60$plot+
+      ylab("CCI")
+    
+    
     #gcc_90
     p_gcc_90_len5_b60<-plot_2groups_PFT(df_len5_nonnorm,"gcc_90","",do_norm = FALSE,TRUE,PFT_name)
     #rcc_90
     p_rcc_90_len5_b60<-plot_2groups_PFT(df_len5_nonnorm,"rcc_90","",do_norm = FALSE,FALSE,PFT_name)
     #GRVI:
     p_GRVI_len5_b60<-plot_2groups_PFT(df_len5_nonnorm,"GRVI","",do_norm = FALSE,FALSE,PFT_name)
+    
   }
   if(length(df_len5_nonnorm$df_dday$gcc_90[!is.na(df_len5_nonnorm$df_dday$gcc_90)])<=10){
     #gcc_90
@@ -458,6 +485,10 @@ analysis_PFTs<-function(df_len5_nonnorm,PFT_name){
                 p_vpd_day_len5_b60=p_vpd_day_len5_b60, 
                 p_SWC_1_len5_b60=p_SWC_1_len5_b60,
                 p_TS_1_len5_b60=p_TS_1_len5_b60,#Environmental factors
+                p_ndvi_len5_b60=p_ndvi_len5_b60,
+                p_evi_len5_b60=p_evi_len5_b60,
+                p_NIRv_len5_b60=p_NIRv_len5_b60,
+                p_cci_len5_b60=p_cci_len5_b60,
                 p_gcc_90_len5_b60=p_gcc_90_len5_b60,
                 p_rcc_90_len5_b60=p_rcc_90_len5_b60,
                 p_GRVI_len5_b60=p_GRVI_len5_b60  #VIs
@@ -509,9 +540,13 @@ merge_plot_fun<-function(out_all,save.path,PFT_name){
   # print(p_merge_EnviroVars)
   ggsave(paste0(save.path,PFT_name,"_","p_EnviroVars.png"),p_merge_EnviroVars,width = 28,height = 15)
   #--------------
-  #III.PhenoCam VIs
+  #III.MODIS VIs/PhenoCam VIs
   #-------------
-  p_merge_VIs<-plot_grid(out_all$p_gcc_90_len5_b60$plot,
+  p_merge_VIs<-plot_grid(out_all$p_ndvi_len5_b60$plot,
+                         out_all$p_evi_len5_b60$plot,
+                         out_all$p_NIRv_len5_b60$plot,
+                         out_all$p_cci_len5_b60$plot,
+                         out_all$p_gcc_90_len5_b60$plot,
                          out_all$p_rcc_90_len5_b60$plot,
                          out_all$p_GRVI_len5_b60$plot,
                          labels = "auto",nrow=2,label_size = 18,align = "hv")
