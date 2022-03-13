@@ -17,11 +17,30 @@ save.path<-"D:/data/photocold_project/GPP_from_diffSources/site_scale/"
 #---------------
 # read in daily data
 load(paste0(daily.GPP.path,"GPP_BESS_FLUX2015_daily.RDA"))
-GPP_temp<-GPP_BESS_new$gpp_bess
 #width=8-->window size=8; by=8:nonoverlapping groups of 8; 
 #align: align the average value to the 1 of 8 values; fill="NA"-->fill value between with NA
-GPP_temp<-rollapply(GPP_temp,width=8,FUN=function(x){mean(x,na.rm=T)},by=8,align="left",fill="NA")
-GPP_BESS_new$gpp_bess_8day<-GPP_temp
+#however, needs to rollmean for each site
+convert_8day_fun<-function(df,source_name){
+  # df<-GPP_BESS_new
+  # source_name<-"bess"
+  
+  Nvar<-length(df)
+  new_names<-c(names(df)[-Nvar],"gpp_ori")
+  names(df)<-new_names
+  #
+  df.proc<-df %>%
+  group_by(sitename)%>%
+  mutate(gpp_ori_8day=rollapply(gpp_ori,width=8,FUN=function(x){mean(x,na.rm=T)},by=8,align="left",fill="NA"))
+  #add new names:
+  gpp_names<-c(paste0("gpp_",source_name),paste0("gpp_",source_name,"_8day"))
+  Nvars<-length(names(df.proc))
+  new.names<-c(names(df.proc)[-c(c(Nvars-1):Nvars)],
+               gpp_names)
+  names(df.proc)<-new.names
+  return(df.proc)
+}
+
+GPP_BESS_new<-convert_8day_fun(GPP_BESS_new,"bess")
 #save the data
 save(GPP_BESS_new,file = paste0(save.path,"GPP_BESS_FLUX2015_8day.RDA"))
 
@@ -63,30 +82,27 @@ save(GPP_VPM_new,file = paste0(save.path,"GPP_VPM_FLUX2015_8day.RDA"))
 # save(GPP_MTE_new,file = paste0(save.path,"GPP_MTE_RF_FLUX2015_8day.RDA"))
 ##---------------
 load(paste0(daily.GPP.path,"GPP_MTE_RF_FLUX2015_daily.RDA"))
-GPP_temp<-GPP_MTE_new$gpp_rf
 #width=8-->window size=8; by=8:nonoverlapping groups of 8; 
 #align: align the average value to the 1 of 8 values; fill="NA"-->fill value between with NA
-GPP_temp<-rollapply(GPP_temp,width=8,FUN=function(x){mean(x,na.rm=T)},by=8,align="left",fill="NA")
-GPP_MTE_new$gpp_rf_8day<-GPP_temp
+GPP_MTE_new<-convert_8day_fun(GPP_MTE_new,"rf")
 #save the data
 save(GPP_MTE_new,file = paste0(save.path,"GPP_MTE_RF_FLUX2015_8day.RDA"))
 
 #---------------
-#(4) For conLUE model
+#(4) For obs and pmodel gpp
 #---------------
 # read in daily data
 load(paste0(daily.GPP.path,"GPP_conLUE_FLUX2015_daily.RDA"))
-GPP_conLUE_new<-GPP_conLUE
-GPP_temp_1<-GPP_conLUE_new$gpp_obs
-GPP_temp_2<-GPP_conLUE_new$gpp_mod_FULL
-GPP_temp_3<-GPP_conLUE_new$gpp_conLUE
+GPP_Obs_new<-GPP_conLUE %>%
+  select(sitename:gpp_obs)
+GPP_Pmodel_new<-GPP_conLUE %>%
+  select(c(sitename:APAR,gpp_mod_FULL))
+##----------convert to 8-day data
 #width=8-->window size=8; by=8:nonoverlapping groups of 8; 
-#align: align the average value to the 1 of 8 values; fill="NA"-->fill value between with NA
-GPP_temp_1<-rollapply(GPP_temp_1,width=8,FUN=function(x){mean(x,na.rm=T)},by=8,align="left",fill="NA")
-GPP_temp_2<-rollapply(GPP_temp_2,width=8,FUN=function(x){mean(x,na.rm=T)},by=8,align="left",fill="NA")
-GPP_temp_3<-rollapply(GPP_temp_3,width=8,FUN=function(x){mean(x,na.rm=T)},by=8,align="left",fill="NA")
-GPP_conLUE_new$gpp_obs_8day<-GPP_temp_1
-GPP_conLUE_new$gpp_mod_FULL_8day<-GPP_temp_2
-GPP_conLUE_new$gpp_conLUE_8day<-GPP_temp_3
+#align: align the average value to the pos 1 of [1:8] values; fill="NA"-->fill NA between values
+GPP_Obs_new<-convert_8day_fun(GPP_Obs_new,"obs")
+GPP_Pmodel_new<-convert_8day_fun(GPP_Pmodel_new,"pmodel")
+#
+GPP_Obs_Pmodel_new<-cbind(GPP_Obs_new,GPP_Pmodel_new[,c("gpp_pmodel","gpp_pmodel_8day")])
 #save the data
-save(GPP_conLUE_new,file = paste0(save.path,"GPP_conLUE_FLUX2015_8day.RDA"))
+save(GPP_Obs_Pmodel_new,file = paste0(save.path,"GPP_Obs_Pmodel_FLUX2015_8day.RDA"))

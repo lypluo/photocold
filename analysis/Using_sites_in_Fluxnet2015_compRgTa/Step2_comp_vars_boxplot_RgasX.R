@@ -222,7 +222,7 @@ comp_boxplot<-function(df,comp_yvar,do_legend,end_xylab){
     # annotate("rect",xmin=0,xmax=70,ymin = -Inf,ymax = Inf,alpha=0.2)+  #
     scale_fill_manual("",values = c("GPP overestimated sites"=adjustcolor("tomato",1),
                     "GPP non-overestimated sites"=adjustcolor("cyan3",1)))+
-    theme(legend.position = c(0.25,0.9),legend.background = element_blank(),
+    theme(legend.position = c(0.2,0.95),legend.background = element_blank(),
           legend.text = element_text(size=20),
           axis.title = element_text(size=20),
           axis.text = element_text(size = 20),
@@ -257,29 +257,46 @@ comp_boxplot<-function(df,comp_yvar,do_legend,end_xylab){
 #-------------
 #1)classification:
 df_bins_SW_IN<-Classify_Nbins_andPlot(df_len5_nonnorm,c(-60,70),"SW_IN_midday_mean_fluxnet2015",10,FALSE)
+df_bins_ppfd<-Classify_Nbins_andPlot(df_len5_nonnorm,c(0,80),"ppfd_fluxnet2015",10,FALSE)
 
 #2)plotting
 #SW_midday_mean and tmin
-p_SW_midday_mean_tmin<-comp_boxplot(df_bins_SW_IN,c("temp_min_fluxnet2015"),TRUE,
-                                   c("SW_IN midday mean (W m-2)","Minimum Ta (ºC)"))
+p_SW_midday_mean_tmin<-comp_boxplot(df_bins_SW_IN,c("temp_min_fluxnet2015"),FALSE,
+                                   c("SW_IN midday mean (W m-2)","Minimum Ta (Â°C)"))
 #SW_midday_mean and max
 p_SW_midday_mean_tmax<-comp_boxplot(df_bins_SW_IN,c("temp_max_fluxnet2015"),FALSE,
-                                    c("SW_IN middday mean (W m-2)","Maximum Ta (ºC)"))
+                                    c("SW_IN middday mean (W m-2)","Maximum Ta (Â°C)"))
 #SW_midday_mean and tmean
 p_SW_midday_mean_tmean<-comp_boxplot(df_bins_SW_IN,c("temp_day_fluxnet2015"),FALSE,
-                                   c("SW_IN middday mean (W m-2)","mean Ta (ºC)"))
+                                   c("SW_IN middday mean (W m-2)","mean Ta (Â°C)"))
 #tmin and alpha_SW
 p_SW_midday_mean_alpha_SW<-comp_boxplot(df_bins_SW_IN,c("alpha_SW"),FALSE,c("SW_IN middday mean (W m-2)","alpha_SW"))
 #tmin and alpha_PPFD
 p_SW_midday_mean_alpha_PPFD<-comp_boxplot(df_bins_SW_IN,c("alpha_PPFD"),FALSE,c("SW_IN middday mean (W m-2)","alpha_PPFD"))
 
+#additional: 2022-March
+p_ppfd_midday_mean_tmin<-comp_boxplot(df_bins_ppfd,c("temp_min_fluxnet2015"),TRUE,
+                                    c("ppfd midday mean (W m-2)","Minimum Ta (Â°C)"))
+
 #-------------------------------------------------------------------------
 #(6) save the plot
 #-------------------------------------------------------------------------
 save.path<-"D:/plots/photocold_project/Using_sites_in_Fluxnet2015_compRgTa/boxplot/"
+#-----------
+#I.save the plot of SW_IN and Tmin
+#-----------
+p_SW_midday_mean_tmin<-p_SW_midday_mean_tmin+
+  xlab(expression("SW"[IN]*" midday mean (W m"^-2*")"))+
+  ylab("")
+
+p_ppfd_midday_mean_tmin<-p_ppfd_midday_mean_tmin+
+  xlab(expression("ppfd (umol m"^-2*"s"^-1*")"))
+p_radiation_Tmin<-plot_grid(p_ppfd_midday_mean_tmin,p_SW_midday_mean_tmin,
+                            width=20,height=12,nrow = 1,ncol=2)
+ggsave(paste0(save.path,"p_radiation_Tmin.png"),p_radiation_Tmin,width = 35,height = 10)
 #merge plots
 #--------------
-#I.Merge Ta and other variables
+#II.Merge Ta and other variables
 #-------------
 p_merge_SWandOther<-plot_grid(p_SW_midday_mean_tmin,p_SW_midday_mean_tmax,p_SW_midday_mean_tmean,
                               p_SW_midday_mean_alpha_SW,p_SW_midday_mean_alpha_PPFD,

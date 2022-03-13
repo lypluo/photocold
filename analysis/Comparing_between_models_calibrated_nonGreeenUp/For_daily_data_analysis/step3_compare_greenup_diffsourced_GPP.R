@@ -65,7 +65,7 @@ df_allsites %>%
   labs(y = expression( paste("GPP (g C m"^-2, " d"^-1, ")" ) ),
        x = "Day of year")
 #############
-#II. have a look at the performance for all the sites identified as "overestimated sites"
+#II. have a look at the performance for all the site-years identified as "overestimated sites"
 #for each site or all sites
 gpp_daily_conLUE_final_over<-gpp_daily_conLUE_final[gpp_daily_conLUE_final$Over_days_length>20,]
 #

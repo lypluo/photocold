@@ -222,7 +222,7 @@ comp_boxplot<-function(df,comp_yvar,do_legend,end_xylab,PFT_name){
   # df<-df_bins_SW_IN_DBF
   # comp_yvar<-c("temp_min_fluxnet2015")
   # do_legend<-FALSE
-  # end_xylab<-c("SW_IN_midday_mean (W m-s s-1)","Minimum Ta (ºC)")
+  # end_xylab<-c("SW_IN_midday_mean (W m-s s-1)","Minimum Ta (?C)")
   # PFT_name<-"DBF"
   #------------------------------------
   #plotting 
@@ -238,7 +238,7 @@ comp_boxplot<-function(df,comp_yvar,do_legend,end_xylab,PFT_name){
     # annotate("rect",xmin=0,xmax=70,ymin = -Inf,ymax = Inf,alpha=0.2)+  #
     scale_fill_manual("",values = c("GPP overestimated sites"=adjustcolor("tomato",1),
                     "GPP non-overestimated sites"=adjustcolor("cyan3",1)))+
-    theme(legend.position = c(0.25,0.9),legend.background = element_blank(),
+    theme(legend.position = c(0.1,0.9),legend.background = element_blank(),
           legend.text = element_text(size=20),
           axis.title = element_text(size=20),
           axis.text = element_text(size = 20),
@@ -258,7 +258,7 @@ comp_boxplot<-function(df,comp_yvar,do_legend,end_xylab,PFT_name){
   #add the PFT name:
   N_x<-length(unique(df.tidy$inbin))
   p_plot_main<-p_plot_main+
-    annotate(geom = "text",x=N_x,y=0,label=PFT_name,col="blue",size=6)
+    annotate(geom = "text",x=N_x,y=-20,label=PFT_name,col="blue",size=8)
   return(p_plot_main)
 }
 ##
@@ -287,13 +287,13 @@ merge_plots<-function(df,PFT_name){
   
   #SW_midday_mean and tmin
   p_SW_midday_mean_tmin<-comp_boxplot(df,c("temp_min_fluxnet2015"),TRUE,
-                                      c("SW_IN midday mean (W m-2)","Minimum Ta (ºC)"),PFT_name)
+                                      c("SW_IN midday mean (W m-2)","Minimum Ta (Â°C)"),PFT_name)
   #SW_midday_mean and max
   p_SW_midday_mean_tmax<-comp_boxplot(df,c("temp_max_fluxnet2015"),FALSE,
-                                      c("SW_IN middday mean (W m-2)","Maximum Ta (ºC)"),PFT_name)
+                                      c("SW_IN middday mean (W m-2)","Maximum Ta (Â°C)"),PFT_name)
   #SW_midday_mean and tmean
   p_SW_midday_mean_tmean<-comp_boxplot(df,c("temp_day_fluxnet2015"),FALSE,
-                                      c("SW_IN middday mean (W m-2)","mean Ta (ºC)"),PFT_name)
+                                      c("SW_IN middday mean (W m-2)","mean Ta (Â°C)"),PFT_name)
   #tmin and alpha_SW
   p_SW_midday_mean_alpha_SW<-comp_boxplot(df,c("alpha_SW"),FALSE,
                                       c("SW_IN middday mean (W m-2)","alpha_SW"),PFT_name)
@@ -326,3 +326,18 @@ ggsave(paste0(save.path,"p_SW_INandother_MF.png"),p_merge_SW_INandOther_MF,width
 p_merge_SW_INandOther_ENF<-merge_plots(df_bins_SW_IN_ENF,"ENF")
 ggsave(paste0(save.path,"p_SW_INandother_ENF.png"),p_merge_SW_INandOther_ENF,width = 35,height = 16)
 
+##-----
+#new plot-->for different PFTs(2022,March)
+##------
+p_SW_midday_mean_tmin_DBF<-comp_boxplot(df_bins_SW_IN_DBF,c("temp_min_fluxnet2015"),TRUE,
+                       c("SW_IN midday mean (W m-2)","Minimum Ta (Â°C)"),"DBF")+
+                       xlab("")+ylab("")
+p_SW_midday_mean_tmin_MF<-comp_boxplot(df_bins_SW_IN_MF,c("temp_min_fluxnet2015"),FALSE,
+                      c("SW_IN midday mean (W m-2)","Minimum Ta (Â°C)"),"MF")+
+                      xlab("")
+p_SW_midday_mean_tmin_ENF<-comp_boxplot(df_bins_SW_IN_ENF,c("temp_min_fluxnet2015"),FALSE,
+                       c("SW_IN midday mean (W m-2)","Minimum Ta (Â°C)"),"ENF")+
+                       xlab(expression("SW"[IN]*" midday mean (W m"^-2*")"))+ylab("")
+p_merge<-plot_grid(p_SW_midday_mean_tmin_DBF,p_SW_midday_mean_tmin_MF,
+                   p_SW_midday_mean_tmin_ENF,ncol = 1)
+ggsave(paste0(save.path,"p_SW_Tmin_PFTs.png"),p_merge,width = 28,height = 20)

@@ -9,21 +9,20 @@ library(ggsci)  #for plot colors
 #----------------
 load.path<-"D:/data/photocold_project/GPP_from_diffSources/site_scale/"
 #BESS
-load(paste0(load.path,"GPP_BESS_FLUX2015_daily.RDA"))
+load(paste0(load.path,"GPP_BESS_FLUX2015_8day.RDA"))
 # #VPM
-# load(paste0(load.path,"GPP_VPM_FLUX2015.RDA")) 
+load(paste0(load.path,"GPP_VPM_FLUX2015_8day.RDA")) 
 #MTE
-load(paste0(load.path,"GPP_MTE_RF_FLUX2015_daily.RDA"))
-#conLUE
-load(paste0(load.path,"GPP_conLUE_FLUX2015_daily.RDA"))
+load(paste0(load.path,"GPP_MTE_RF_FLUX2015_8day.RDA"))
+#Pmodel and Obs
+load(paste0(load.path,"GPP_Obs_Pmodel_FLUX2015_8day.RDA"))
 
 #-----------------
 #(2)Merge different data sources
 #----------------
-df_merge<-left_join(GPP_conLUE,GPP_BESS_new,by=c("sitename","date","doy"))
+df_merge<-left_join(GPP_Obs_Pmodel_new,GPP_BESS_new,by=c("sitename","date","doy"))
 #
-#do not use VPM temporaily since it has 8-day avearge
-# df_merge<-left_join(df_merge,GPP_VPM_new,by=c("sitename","date","doy"))
+df_merge<-left_join(df_merge,GPP_VPM_new,by=c("sitename","date","doy"))
 #
 df_merge<-left_join(df_merge,GPP_MTE_new,by=c("sitename","date","doy"))
 #
@@ -42,13 +41,9 @@ df_merge<-df_merge%>%
     df_sites_modis_era,
     by = "sitename"
   )
-#re-name the variables:gpp_mod_FULL-->gpp_pmodel
-df_merge<-df_merge %>%
-  mutate(gpp_pmodel=gpp_mod_FULL,
-         gpp_mod_FULL=NULL)
 
 #--------------------------------
 #(3)save the data
 #-------------------------------
 save.path<-"D:/data/photocold_project/Merge_Data/Comparing_between_models_calibrated_nonGreeenUp/"
-save(df_merge,file = paste0(save.path,"GPP_from_diffSource_daily.RDA"))
+save(df_merge,file = paste0(save.path,"GPP_from_diffSource_8day.RDA"))

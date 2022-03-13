@@ -65,8 +65,8 @@ cost.function <- function(df.proc,par) {
 # set initial value for parameter
 
 calibrate_fun<-function(df,model_name){
-  df<-df_merge
-  model_name<-"bess"
+  # df<-df_merge
+  # model_name<-"bess"
   
   #---select the variables------
   gpp_name<-paste0("gpp_",model_name)

@@ -339,20 +339,20 @@ plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
 #I.GPP and LUE
 #-------------
 # #gpp_obs
-# p_gpp_obs_len5_b60<-plot_2groups(df_len5_nonnorm,"gpp_obs","(umol m-2 s-1)",do_norm = FALSE,do_legend = TRUE)
-# #gpp biaes
-# p_gpp_biaes_len5_b60<-plot_2groups(df_len5_nonnorm,"gpp_res","(umol m-2 s-1)",do_norm = FALSE,FALSE)
-# #LUE
-# p_LUE_len5_b60<-plot_2groups(df_len5_nonnorm,"LUE","",do_norm = FALSE,FALSE)
-# #for ppfd
-# p_ppfd_len5_b60<-plot_2groups(df_len5_nonnorm,"ppfd_fluxnet2015","(u mol m-2 s-1)",do_norm = FALSE,do_legend = FALSE)
-# #fapar_spl and fapar_itpl
-# p_fapar_itpl_len5_b60<-plot_2groups(df_len5_nonnorm,"fapar_itpl","",do_norm = FALSE,do_legend = FALSE)
-# #some modifying in the plot:
-# p_ppfd_len5_b60$plot<-p_ppfd_len5_b60$plot+
-#   ylab("ppfd (u mol m-2 s-1)")
-# p_fapar_itpl_len5_b60$plot<-p_fapar_itpl_len5_b60$plot+
-#   ylab("fapar")
+p_gpp_obs_len5_b60<-plot_2groups(df_len5_nonnorm,"gpp_obs","(umol m-2 s-1)",do_norm = FALSE,do_legend = TRUE)
+#gpp biaes
+p_gpp_biaes_len5_b60<-plot_2groups(df_len5_nonnorm,"gpp_res","(umol m-2 s-1)",do_norm = FALSE,FALSE)
+#LUE
+p_LUE_len5_b60<-plot_2groups(df_len5_nonnorm,"LUE","",do_norm = FALSE,FALSE)
+#for ppfd
+p_ppfd_len5_b60<-plot_2groups(df_len5_nonnorm,"ppfd_fluxnet2015","(u mol m-2 s-1)",do_norm = FALSE,do_legend = FALSE)
+#fapar_spl and fapar_itpl
+p_fapar_itpl_len5_b60<-plot_2groups(df_len5_nonnorm,"fapar_itpl","",do_norm = FALSE,do_legend = FALSE)
+#some modifying in the plot:
+p_ppfd_len5_b60$plot<-p_ppfd_len5_b60$plot+
+  ylab(expression("ppfd (umol"*" m"^-2*" s"^-1*")"))
+p_fapar_itpl_len5_b60$plot<-p_fapar_itpl_len5_b60$plot+
+  ylab("fapar")
 #--------------
 #II.Environment variables
 #note by YP 2021-11-21:
@@ -380,10 +380,10 @@ p_PPFD_IN_fullday_mean_len5_b60<-plot_2groups(df_len5_nonnorm,"PPFD_IN_fullday_m
 p_PPFD_IN_midday_mean_len5_b60<-plot_2groups(df_len5_nonnorm,"PPFD_IN_midday_mean_fluxnet2015","(umol m-2 s-1)",do_norm = FALSE,FALSE)
 #PPFD_IN_midday_max
 p_PPFD_IN_midday_max_len5_b60<-plot_2groups(df_len5_nonnorm,"PPFD_IN_midday_max_fluxnet2015","(umol m-2 s-1)",do_norm = FALSE,FALSE)
-# #TS_1-->first layer soil temperature
-# p_TS_1_len5_b60<-plot_2groups(df_len5_nonnorm,"TS_1_fluxnet2015","(degreeC)",do_norm = FALSE,FALSE)
-# #SWC_1-->first layer soil mosture
-# p_SWC_1_len5_b60<-plot_2groups(df_len5_nonnorm,"SWC_1_fluxnet2015","(%)",do_norm = FALSE,FALSE)
+#TS_1-->first layer soil temperature
+p_TS_1_len5_b60<-plot_2groups(df_len5_nonnorm,"TS_1_fluxnet2015","(degreeC)",do_norm = FALSE,FALSE)
+#SWC_1-->first layer soil mosture
+p_SWC_1_len5_b60<-plot_2groups(df_len5_nonnorm,"SWC_1_fluxnet2015","(%)",do_norm = FALSE,FALSE)
 #albedo_SW_IN
 p_alpha_SW_len5_b60<-plot_2groups(df_len5_nonnorm,"alpha_SW","",do_norm = FALSE,FALSE)
 #albedo_ppfd
@@ -392,34 +392,34 @@ p_alpha_PPFD_len5_b60<-plot_2groups(df_len5_nonnorm,"alpha_PPFD","",do_norm = FA
 
 #some modifying in the plot:
 p_temp_min_len5_b60$plot<-p_temp_min_len5_b60$plot+
-  ylab("Minimum Ta (ºC)")+
+  ylab("Minimum Ta (Â°C)")+
   ylim(-30,25)
 p_temp_day_len5_b60$plot<-p_temp_day_len5_b60$plot+
-  ylab("Mean Ta (ºC)")+
+  ylab("Mean Ta (Â°C)")+
   ylim(-30,25)
 # p_temp_max_len5_b60$plot<-p_temp_max_len5_b60$plot+
-#   ylab("Maximum Ta (ºC)")+
+#   ylab("Maximum Ta (?C)")+
 #   ylim(-30,25)
 # p_prec_len5_b60$plot<-p_prec_len5_b60$plot+
 #   ylab("prec (mm)")
 # p_vpd_day_len5_b60$plot<-p_vpd_day_len5_b60$plot+
 #   ylab("vpd_day (Pa)")
 p_SW_IN_fullday_mean_len5_b60$plot<-p_SW_IN_fullday_mean_len5_b60$plot+
-  ylab("SW_IN daily mean (W m-2)")
+  ylab(expression("SW_IN daily mean (W"*" m"^-2*")"))
 p_SW_IN_midday_mean_len5_b60$plot<-p_SW_IN_midday_mean_len5_b60$plot+
-  ylab("SW_IN midday mean (W m-2)")
+  ylab(expression("SW_IN midday mean (W"*" m"^-2*")"))
 p_SW_IN_midday_max_len5_b60$plot<-p_SW_IN_midday_max_len5_b60$plot+
-  ylab("SW_IN daily max (W m-2)")
+  ylab(expression("SW_IN daily max (W"*" m"^-2*")")) 
 
 p_PPFD_IN_fullday_mean_len5_b60$plot<-p_PPFD_IN_fullday_mean_len5_b60$plot+
-  ylab("PPFD_IN daily mean (umol m-2 s-1)")
+  ylab(expression("PPFD_IN daily mean (umol"*" m"^-2*" s"^-1*")"))
 p_PPFD_IN_midday_mean_len5_b60$plot<-p_PPFD_IN_midday_mean_len5_b60$plot+
-  ylab("PPFD_IN midday mean (umol m-2 s-1)")
+  ylab(expression("PPFD_IN midday mean (umol"*" m"^-2*" s"^-1*")"))
 p_PPFD_IN_midday_max_len5_b60$plot<-p_PPFD_IN_midday_max_len5_b60$plot+
-  ylab("PPFD_IN daily max (umol m-2 s-1)")
+  ylab(expression("PPFD_IN daily max (umol"*" m"^-2*" s"^-1*")"))
 
 # p_TS_1_len5_b60$plot<-p_TS_1_len5_b60$plot+
-#   ylab("TS (ºC)")
+#   ylab("TS (?C)")
 # p_SWC_1_len5_b60$plot<-p_SWC_1_len5_b60$plot+
 #   ylab("SWC (%)")
 p_alpha_SW_len5_b60$plot<-p_alpha_SW_len5_b60$plot+
@@ -472,6 +472,13 @@ ggsave(paste0(save.path,"p_EnviroVars.png"),p_merge_EnviroVars,width = 15,height
 #                        p_GRVI_len5_b60$plot,
 #                        labels = "auto",nrow=2,label_size = 18,align = "hv")
 # ggsave(paste0(save.path,"p_VIs.png"),p_merge_VIs,width = 15,height = 10)
+p_merge_EnviroVars<-plot_grid(
+  p_temp_min_len5_b60$plot,p_temp_day_len5_b60$plot,
+  p_SW_IN_fullday_mean_len5_b60$plot,p_SW_IN_midday_mean_len5_b60$plot,p_SW_IN_midday_max_len5_b60$plot,
+  p_PPFD_IN_fullday_mean_len5_b60$plot,p_PPFD_IN_midday_mean_len5_b60$plot,p_PPFD_IN_midday_max_len5_b60$plot,
+  p_alpha_SW_len5_b60$plot,p_alpha_PPFD_len5_b60$plot,
+  labels = "auto",ncol=2,label_size = 18,align = "hv")
+
 #--------------
 #IV.stats-->difference test
 #-------------

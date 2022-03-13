@@ -16,13 +16,13 @@ load(paste0(load.path,"GPP_BESS_FLUX2015_8day.RDA"))
 load(paste0(load.path,"GPP_VPM_FLUX2015_8day.RDA"))
 #MTE
 load(paste0(load.path,"GPP_MTE_RF_FLUX2015_8day.RDA"))
-#conLUE
-load(paste0(load.path,"GPP_conLUE_FLUX2015_8day.RDA"))
+#Obs+Pmodel
+load(paste0(load.path,"GPP_Obs_Pmodel_FLUX2015_8day.RDA"))
 
 #-----------------
 #(2)Merge different data sources
 #----------------
-df_merge<-left_join(GPP_conLUE_new,GPP_BESS_new,by=c("sitename","date","doy"))
+df_merge<-left_join(GPP_Obs_Pmodel_new,GPP_BESS_new,by=c("sitename","date","doy"))
 #
 df_merge<-left_join(df_merge,GPP_VPM_new,by=c("sitename","date","doy"))
 #

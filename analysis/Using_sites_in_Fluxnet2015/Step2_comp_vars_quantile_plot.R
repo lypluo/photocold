@@ -301,7 +301,7 @@ plot_2groups<-function(df,comp_var,var_unit,do_norm,do_legend){
       scale_fill_manual("",values = c("GPP overestimated sites"="red","GPP non-overestimated sites"="green4"))+
       ylab(paste0(comp_var," ",var_unit))+
       theme_classic()+
-      theme(legend.position = c(0.35,0.9),legend.background = element_blank(),
+      theme(legend.position = c(0.4,0.9),legend.background = element_blank(),
             legend.text = element_text(size=20),
             axis.title = element_text(size=24),
             axis.text = element_text(size = 20))+
@@ -349,9 +349,17 @@ p_ppfd_len5_b60<-plot_2groups(df_len5_nonnorm,"ppfd_fluxnet2015","(u mol m-2 s-1
 #fapar_spl and fapar_itpl
 p_fapar_itpl_len5_b60<-plot_2groups(df_len5_nonnorm,"fapar_itpl","",do_norm = FALSE,do_legend = FALSE)
 #some modifying in the plot:
+p_gpp_obs_len5_b60$plot<-p_gpp_obs_len5_b60$plot+
+  xlab("")+
+  ylab(expression("GPP"[obs]*" (g "*"m"^-2*" d"^-1*")"))
+p_gpp_biaes_len5_b60$plot<-p_gpp_biaes_len5_b60$plot+
+  xlab("")+
+  ylab(expression("GPP bias"*" (g "*"m"^-2*" d"^-1*")"))
 p_ppfd_len5_b60$plot<-p_ppfd_len5_b60$plot+
-  ylab("ppfd (u mol m-2 s-1)")
+  xlab("")+
+  ylab(expression("ppfd"*" (u mol "*"m"^-2*" s"^-1*")"))
 p_fapar_itpl_len5_b60$plot<-p_fapar_itpl_len5_b60$plot+
+  xlab("")+
   ylab("fapar")
 #--------------
 #II.Environment variables
@@ -361,7 +369,7 @@ p_fapar_itpl_len5_b60$plot<-p_fapar_itpl_len5_b60$plot+
 #temp_day
 p_temp_day_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_day_fluxnet2015","(degreeC)",do_norm = FALSE,FALSE)
 #temp_min
-p_temp_min_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_min_fluxnet2015","(degreeC)",do_norm = FALSE,do_legend = TRUE)
+p_temp_min_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_min_fluxnet2015","(degreeC)",do_norm = FALSE,do_legend = FALSE)
 #temp_max
 p_temp_max_len5_b60<-plot_2groups(df_len5_nonnorm,"temp_max_fluxnet2015","(degreeC)",do_norm = FALSE,FALSE)
 #for prec
@@ -377,22 +385,22 @@ p_SWC_1_len5_b60<-plot_2groups(df_len5_nonnorm,"SWC_1_fluxnet2015","(%)",do_norm
 
 #some modifying in the plot:
 p_temp_min_len5_b60$plot<-p_temp_min_len5_b60$plot+
-  ylab("Minimum Ta (ºC)")+
+  ylab("Minimum Ta (Â°C)")+
   ylim(-30,25)
 p_temp_day_len5_b60$plot<-p_temp_day_len5_b60$plot+
-  ylab("Mean Ta (ºC)")+
+  ylab("Mean Ta (Â°C)")+
   ylim(-30,25)
 p_temp_max_len5_b60$plot<-p_temp_max_len5_b60$plot+
-  ylab("Maximum Ta (ºC)")+
+  ylab("Maximum Ta (Â°C)")+
   ylim(-30,25)
 p_prec_len5_b60$plot<-p_prec_len5_b60$plot+
   ylab("prec (mm)")
 p_vpd_day_len5_b60$plot<-p_vpd_day_len5_b60$plot+
   ylab("vpd_day (Pa)")
 p_SW_IN_len5_b60$plot<-p_SW_IN_len5_b60$plot+
-  ylab("SW_IN (W m-2)")
+  ylab(expression("SW_IN"*" (W"*" m"^-2*")"))
 p_TS_1_len5_b60$plot<-p_TS_1_len5_b60$plot+
-  ylab("TS (ºC)")
+  ylab("TS (Â°C)")
 p_SWC_1_len5_b60$plot<-p_SWC_1_len5_b60$plot+
   ylab("SWC (%)")
 #--------------
@@ -487,6 +495,17 @@ p_merge_VIs<-plot_grid(p_ndvi_len5_b60$plot,
                        p_GRVI_len5_b60$plot,
                        labels = "auto",nrow=2,label_size = 18,align = "hv")
 ggsave(paste0(save.path,"p_VIs.png"),p_merge_VIs,width = 15,height = 10)
+
+###------------newly merge plots-------------
+
+#---------------------------
+p_merge_new<-plot_grid(
+  p_gpp_obs_len5_b60$plot,p_LUE_len5_b60$plot,p_gpp_biaes_len5_b60$plot,
+  p_ppfd_len5_b60$plot,p_fapar_itpl_len5_b60$plot,p_temp_min_len5_b60$plot,
+  p_TS_1_len5_b60$plot,p_SWC_1_len5_b60$plot,
+  labels = "auto",ncol=3,label_size = 18,align = "hv"
+)
+ggsave(paste0(save.path,"p_new_merged.png"),p_merge_new,width = 20,height = 13)
 #--------------
 #IV.stats-->difference test
 #-------------
