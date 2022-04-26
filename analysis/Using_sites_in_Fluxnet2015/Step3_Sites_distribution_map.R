@@ -98,6 +98,10 @@ lon.short  <- seq(-180, 180, 10)
 
 a <- sapply( lat.labels, function(x) if (x>0) {parse(text = paste0(x, "*degree ~ N"))} else if (x==0) {parse(text = paste0(x, "*degree"))} else {parse(text = paste0(-x, "*degree ~ S"))} )
 b <- sapply( lon.labels, function(x) if (x>0) {parse(text = paste0(x, "*degree ~ E"))} else if (x==0) {parse(text = paste0(x, "*degree"))} else {parse(text = paste0(-x, "*degree ~ W"))} )
+#update in March, 2022
+a<-expression("30°" ~ N, "60°" ~ N, "90°" ~ N)
+b<-expression("30°"  ~ W, "120°" ~ W, "60°" ~ W,"0°",
+              "60°" ~ E, "120°" ~ E, "180°" ~ E)
 #---------------------------------------------
 # 1. Create ggplot object
 #---------------------------------------------
@@ -144,10 +148,22 @@ gg_merge_with_sitenames<-gg+
   scale_color_manual("",values = c("Original"="red","Final"="green"))+
   theme(legend.position = "bottom")
 
+##new plot-->update in March, 2022
+gg_merge_with_sitename_new<-gg+
+  # geom_point(data=ori_coord_sites,aes(x=lon,y=lat,col="Original"),size=2,pch=16,)+
+  geom_point(data=final_coord_sites,aes(x=lon,y=lat,col=classid),size=2.5,pch=16)+
+  geom_label_repel(data=ori_coord_sites,aes(x=lon,y=lat,label = sitename,fill = koeppen_code),
+                   color = 'black',max.overlaps = 50,label.size = 0.1,arrow = arrow(ends = "first",length = unit(0.05,"inch")),
+                   size = 2.5) +
+  theme(legend.position = "bottom")+
+  theme_grey()
+
 #
 save.path<-"D:/plots/photocold_project/Using_sites_in_Fluxnet2015/sites_map/"
-plot(gg_merge_no_sitenames)
-ggsave(file=paste0(save.path,"sites_distribution_no_sitenames.png"),gg_merge_no_sitenames,dev="png",width = 12,height=6)
+# plot(gg_merge_no_sitenames)
+# ggsave(file=paste0(save.path,"sites_distribution_no_sitenames.png"),gg_merge_no_sitenames,dev="png",width = 12,height=6)
 plot(gg_merge_with_sitenames)
 ggsave(file=paste0(save.path,"sites_distribution_with_sitenames.png"),gg_merge_with_sitenames,dev="png",width = 12,height=6)
+plot(gg_merge_with_sitename_new)
+ggsave(file=paste0(save.path,"sites_distribution_with_sitenames_new.png"),gg_merge_with_sitename_new,dev="png",width = 12,height=6)
 

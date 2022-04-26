@@ -1,0 +1,193 @@
+---
+title: "Calibrate rsofun with photocold branch"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+#load packages:
+devtools::load_all("D:/Github/rbeni/")
+devtools::load_all("D:/Github/ingestr/")
+
+
+library(tidyverse)
+library(ingestr)
+library(knitr)
+library(lubridate)
+library(rbeni)
+```
+
+
+## Load data
+
+
+```{r message=FALSE, warning=FALSE}
+#
+load.path<-"D:/data/photocold_project/Merge_Data/Comparing_between_models_calibrated_nonGreeenUp/data_for_Beni/"
+load(paste0(load.path,"df_daily.RDA"))
+
+# load("data/df_daily.RDA") # reads df_final
+ddf <- df_final %>% 
+  as_tibble() %>%
+  mutate(doy = lubridate::yday(date)) %>% 
+  mutate(greenup = ifelse(doy > sos & doy < peak, TRUE, FALSE))
+```
+
+```{r}
+visdat::vis_miss(ddf, warn_large_data = FALSE)
+```
+
+PROBLEM: Lots of temperature and VPD data is missing. Make sure to get complete data. Should be available (P-model outputs are available too).
+
+## Empirical LUE models
+
+Determine bias of early season bias of empirical LUE models by fitting models outside greenup period.
+
+```{r}
+ddf <- ddf %>% 
+  mutate(lue = gpp_obs / (fapar * ppfd)) %>% 
+  mutate(lue = remove_outliers(lue))
+## take mean LUE for constant-LUE model
+mod_constlue <- ddf %>% 
+  filter(!greenup) %>% 
+  pull(lue) %>% 
+  mean(., na.rm = TRUE)
+  
+## LUE as a linear function of temp and vpd
+mod_lue_temp_vpd <- lm(lue ~ temp + vpd, 
+                       data = ddf %>% 
+                         filter(!greenup))
+ddf <- ddf %>% 
+  mutate(lue_temp_vpd = predict(mod_lue_temp_vpd, newdata = .)) %>% 
+  mutate(gpp_temp_vpd = lue_temp_vpd * fapar * ppfd,
+         gpp_lue_const = mod_constlue * fapar * ppfd)
+```
+
+Compare models
+```{r}
+## P-model
+ddf %>% 
+  analyse_modobs2("gpp_pmodel", "gpp_obs", type = "hex")
+## constant LUE model
+ddf %>% 
+  analyse_modobs2("gpp_lue_const", "gpp_obs", type = "hex")
+## LUE ~ temp + VPD model
+ddf %>% 
+  analyse_modobs2("gpp_temp_vpd", "gpp_obs", type = "hex")
+```
+
+## Mean seasonal cycle
+
+... per site
+```{r}
+df_meandoy <- ddf %>% 
+  group_by(sitename, doy) %>% 
+  summarise(across(starts_with("gpp_"), mean, na.rm = TRUE))
+```
+
+### Plot by site
+
+```{r, out.height="500%"}
+plot1<-df_meandoy %>% 
+  pivot_longer(c(gpp_obs, gpp_pmodel, gpp_bess, gpp_rf, gpp_lue_const, gpp_temp_vpd), names_to = "model", values_to = "gpp") %>% 
+  ggplot() +
+  # geom_ribbon(
+  #   aes(x = doy, ymin = obs_min, ymax = obs_max), 
+  #   fill = "black", 
+  #   alpha = 0.2
+  #   ) +
+  geom_line(aes(x = doy, y = gpp, color = model), size = 0.4) +
+  labs(y = expression( paste("Simulated GPP (g C m"^-2, " d"^-1, ")" ) ), 
+       x = "DOY") +
+  facet_wrap( ~sitename, ncol = 3 ) +    # , labeller = labeller(climatezone = list_rosetta)
+  theme_gray() +
+  theme(legend.position = "bottom")
+  # scale_color_manual(
+  #   name="Model: ",
+  #   values=c("red", "black", "royalblue", "darkgoldenrod", "springgreen", "orchid4")
+  #   )
+# ggsave("fig/gpp_meandoy.pdf", height = 25, width = 8)
+ggsave(paste0("D:/Github/photocold/","./fig/gpp_meandoy.pdf"),plot1, height = 25, width = 8)
+
+```
+
+## Normalise to peak season
+
+... by site, using the upper 25% quantile.
+```{r}
+norm_to_peak <- function(df, mod, obs){
+  
+  q75_obs <- quantile(df[[obs]], probs = 0.75, na.rm = TRUE)
+  q75_mod <- quantile(df[[mod]], probs = 0.75, na.rm = TRUE)
+  
+  ## normalise mod
+  df[[mod]] <- df[[mod]] * 
+    mean(df[[obs]][df[[obs]]>q75_obs], na.rm = TRUE) / 
+    mean(df[[mod]][df[[obs]]>q75_obs], na.rm = TRUE)
+  
+  return(df)
+}
+ddf_norm <- ddf %>% 
+  group_by(sitename) %>% 
+  nest() %>% 
+  mutate(data = purrr::map(data, ~norm_to_peak(., "gpp_pmodel", "gpp_obs"))) %>% 
+  mutate(data = purrr::map(data, ~norm_to_peak(., "gpp_bess", "gpp_obs"))) %>% 
+  mutate(data = purrr::map(data, ~norm_to_peak(., "gpp_rf", "gpp_obs"))) %>% 
+  mutate(data = purrr::map(data, ~norm_to_peak(., "gpp_lue_const", "gpp_obs"))) %>% 
+  mutate(data = purrr::map(data, ~norm_to_peak(., "gpp_temp_vpd", "gpp_obs"))) %>% 
+  unnest(data)
+```
+
+### Plot normalised by site 
+
+```{r}
+df_meandoy_norm <- ddf_norm %>% 
+  group_by(sitename, doy) %>% 
+  summarise(across(starts_with("gpp_"), mean, na.rm = TRUE))
+```
+
+```{r, out.height="500%"}
+plot2<-df_meandoy_norm %>% 
+  pivot_longer(c(gpp_obs, gpp_pmodel, gpp_bess, gpp_rf, gpp_lue_const, gpp_temp_vpd), names_to = "model", values_to = "gpp") %>% 
+  ggplot() +
+  # geom_ribbon(
+  #   aes(x = doy, ymin = obs_min, ymax = obs_max), 
+  #   fill = "black", 
+  #   alpha = 0.2
+  #   ) +
+  geom_line(aes(x = doy, y = gpp, color = model), size = 0.4) +
+  labs(y = expression( paste("Simulated GPP (g C m"^-2, " d"^-1, ")" ) ), 
+       x = "DOY") +
+  facet_wrap( ~sitename, ncol = 3, scales = "free_y" ) +
+  theme_gray() +
+  theme(legend.position = "bottom")
+  # scale_color_manual(
+  #   name="Model: ",
+  #   values=c("red", "black", "royalblue", "darkgoldenrod", "springgreen", "orchid4")
+  #   )
+ggsave(paste0("D:/Github/photocold/","./fig/gpp_meandoy_norm.pdf"),plot2, height = 25, width = 8)
+
+##
+df_meandoy_norm %>% 
+  group_by(doy)%>%
+  summarise(gpp_obs=mean(gpp_obs,na.rm=T),gpp_pmodel=mean(gpp_pmodel,na.rm=T),
+            gpp_bess=mean(gpp_bess,na.rm=T),gpp_rf=mean(gpp_rf,na.rm=T),
+            gpp_lue_const=mean(gpp_lue_const,na.rm=T),gpp_temp_vpd=mean(gpp_temp_vpd,na.rm=T)
+            )%>%
+  pivot_longer(c(gpp_obs, gpp_pmodel, gpp_bess, gpp_rf, gpp_lue_const, gpp_temp_vpd), names_to = "model", values_to = "gpp") %>% 
+  ggplot() +
+  # geom_ribbon(
+  #   aes(x = doy, ymin = obs_min, ymax = obs_max), 
+  #   fill = "black", 
+  #   alpha = 0.2
+  #   ) +
+  geom_line(aes(x = doy, y = gpp, color = model), size = 0.4) +
+  labs(y = expression( paste("Simulated GPP (g C m"^-2, " d"^-1, ")" ) ), 
+       x = "DOY") +
+  # facet_wrap( ~sitename, ncol = 3, scales = "free_y" ) +
+  theme_gray() +
+  theme(legend.position = "bottom")
+```

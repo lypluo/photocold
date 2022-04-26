@@ -8,6 +8,10 @@
 #---------------------
 load.path<-"D:/data/photocold_project/event_length/Using_sites_in_Fluxnet2015/"
 load(paste0(load.path,"df_events_length.RDA"))
+#
+tt<-df_events_all %>%
+  group_by(sitename) %>%
+  summarise(Years=range(Year))
 # a function to separate out the site-year that event_length higher than some thresholds(e.g. 30 days)
 sep_siteyears<-function(df,sep_var,sep_thrs){
   # df<-df_events_all

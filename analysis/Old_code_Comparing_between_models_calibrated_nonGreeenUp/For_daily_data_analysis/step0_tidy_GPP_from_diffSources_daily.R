@@ -47,7 +47,7 @@ df_merge<-df_merge%>%
 df_merge<-df_merge %>%
   mutate(gpp_pmodel=gpp_mod_FULL,
          gpp_mod_FULL=NULL)
-#check gpp values
+# check gpp values for each site:
 df_merge %>%
   select(sitename,doy,Over_days_length,starts_with("gpp_")) %>%
   pivot_longer(c(gpp_obs,gpp_conLUE,gpp_bess,gpp_rf,gpp_pmodel),
@@ -57,7 +57,17 @@ df_merge %>%
   ggplot(aes(x=doy,y=gpp,col=source))+
   geom_point()+
   facet_wrap(~sitename)
-  
+# check gpp values for all:
+df_merge %>%
+  select(sitename,doy,Over_days_length,starts_with("gpp_")) %>%
+  pivot_longer(c(gpp_obs,gpp_conLUE,gpp_bess,gpp_rf,gpp_pmodel),
+               names_to="source",values_to="gpp") %>%
+  filter(Over_days_length>20)%>%
+  group_by(doy,source) %>%
+  summarise(gpp=mean(gpp,na.rm=T))%>%
+  ggplot(aes(x=doy,y=gpp,col=source))+
+  geom_point()
+
 #--------------------------------
 #(3)save the data
 #-------------------------------
