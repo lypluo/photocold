@@ -21,7 +21,7 @@ difftest_function<-function(Data1,Data2){
     ks_result[i]<-temp$p.value
   }
   # if p-value=NA for ks_test, then set ks_test=0
-  if(is.na(ks_result)){
+  if(length(is.na(ks_result))==2){ ## if two p-values are NA, set ks_result<-c(0,0)
     ks_result<-c(0,0)
   }
   
